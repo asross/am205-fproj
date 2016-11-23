@@ -7,7 +7,7 @@ def modmat_mult(C, D, mod):
   for i in range(m):
     for j in range(p):
       for k in range(n):
-        E[i,j] = (E[i,j] + ((C[i,k] * D[k,j]) % mod)) % mod
+        E[i,j] = (E[i,j] + C[i,k] * D[k,j]) % mod
   return E
 
 def modmat_dot(A, x, mod):
@@ -21,7 +21,7 @@ def modmat_fsolve(L, b, mod):
   for i in range(n):
     s = b[i]
     for j in range(0, i):
-      s = (s + ((L[i, j] * x[j]) % mod)) % mod
+      s = (s + L[i, j] * x[j]) % mod
     x[i] = s
   return x
 
@@ -33,7 +33,7 @@ def modmat_rsolve(U, b, mod):
   for i in range(n - 1, -1, -1):
     s = b[i]
     for j in range(i + 1, n):
-      s = (s + ((U[i, j] * x[j]) % mod)) % mod
+      s = (s + U[i, j] * x[j]) % mod
     x[i] = s
   return x
 
@@ -63,7 +63,7 @@ def modmat_lu(A, mod):
       L[i, j] = U[i, j]
       #eliminate column
       for k in range(j, n):
-        U[i, k] = (U[i, k] + ((L[i, j] * U[j, k]) % mod)) % mod
+        U[i, k] = (U[i, k] + L[i, j] * U[j, k]) % mod
 
   return P, L, U
 
