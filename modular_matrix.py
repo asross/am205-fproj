@@ -202,17 +202,20 @@ if __name__ == '__main__':
   A = transition_matrix(transition_fn, 3, 3)
   grid = np.array([[0,1,1],[1,0,0],[0,1,1]])
   presses = modmat_solve(A, grid.ravel(), 3)
-  print(grid)
-  print(modmat_dot(A, presses, 3).reshape(grid.shape))
+  np.testing.assert_array_equal(modmat_dot(A, presses, 3), grid.ravel())
 
-  # state = grid.ravel()
-  # print(state.reshape(grid.shape))
-  # for i, n in enumerate(presses):
-    # for _ in range(n):
-      # press = np.zeros(len(presses), dtype=np.int8)
-      # press[i] = 1
-      # effect = modmat_dot(A, press, 3)
-      # state = (state + effect) % 3
-      # print(state.reshape(grid.shape))
+  # print out solving mod 3 light array
+  # note we want to undo the presses that created the pattern mod 3
+  solution_presses = -1 * presses % 3
+  state = grid.ravel()
+  print(state.reshape(grid.shape))
+  for i, n in enumerate(solution_presses):
+    for _ in range(n):
+      press = np.zeros(len(presses), dtype=np.int8)
+      press[i] = 1
+      effect = modmat_dot(A, press, 3)
+      state = (state + effect) % 3
+      print(state.reshape(grid.shape))
+  np.testing.assert_array_equal(state.ravel(), np.zeros(9))
 
   print('done!')
