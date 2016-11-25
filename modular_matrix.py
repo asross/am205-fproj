@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import numpy as np
 from collections import defaultdict
 
@@ -59,8 +60,9 @@ def modmat_lu(A, mod):
   L = np.identity(n, dtype=np.int8)
   P = np.identity(n, dtype=np.int8)
   for j in range(n-1):
+    #select non-zero row
     for i in range(j, n):
-      if U[i, j] == 1:
+      if U[i, j] != 0:
         #swap rows of U
         temp = np.array(U[j, j:n])
         U[j, j:n] = U[i, j:n]
@@ -74,11 +76,11 @@ def modmat_lu(A, mod):
         P[j, :] = P[i, :]
         P[i, :] = temp
         break
-  # Now apply the normal LU operations
-  for i in range(j+1, n):
-    L[i,j] = mod_divide(U[i,j], U[j,j], mod)
-    for k in range(j, n):
-      U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % mod
+    # Now apply the normal LU operations
+    for i in range(j+1, n):
+      L[i,j] = mod_divide(U[i,j], U[j,j], mod)
+      for k in range(j, n):
+        U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % mod
 
   return P, L, U
 
@@ -109,13 +111,13 @@ if __name__ == '__main__':
 
   # solving with identity should echo b
   L = np.array([[1, 0],
-                [0, 1]], dtype=np.int8) 
+                [0, 1]], dtype=np.int8)
   b = np.array([1, 1], dtype=np.int8)
   np.testing.assert_array_equal(modmat_fsolve(L, b, 2), b)
 
   # another case where we should echo the same b
   L = np.array([[1, 0],
-                [1, 1]], dtype=np.int8) 
+                [1, 1]], dtype=np.int8)
   b = np.array([0, 1], dtype=np.int8)
   np.testing.assert_array_equal(modmat_fsolve(L, b, 2), b)
 
@@ -129,7 +131,7 @@ if __name__ == '__main__':
 
   # for I, should return 3 Is
   I =  np.array([[1, 0],
-                 [0, 1]], dtype=np.int8) 
+                 [0, 1]], dtype=np.int8)
   P, L, U = modmat_lu(I, 2)
   np.testing.assert_array_equal(P, I)
   np.testing.assert_array_equal(L, I)
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 
   # on an upper triangular matrix U, should return U + 2Is
   A = np.array([[1, 1],
-                [0, 1]], dtype=np.int8) 
+                [0, 1]], dtype=np.int8)
   P, L, U = modmat_lu(A, 2)
   np.testing.assert_array_equal(P, I)
   np.testing.assert_array_equal(L, I)
@@ -149,7 +151,7 @@ if __name__ == '__main__':
 
   # on a lower triangular matrix L, should return L + 2Is
   A = np.array([[1, 0],
-                [1, 1]], dtype=np.int8) 
+                [1, 1]], dtype=np.int8)
   P, L, U = modmat_lu(A, 2)
   np.testing.assert_array_equal(P, I)
   np.testing.assert_array_equal(L, A)
@@ -158,7 +160,7 @@ if __name__ == '__main__':
   # on a permutation P, it should return P^T + 2Is
   A = np.array([[0, 1, 0],
                 [0, 0, 1],
-                [1, 0, 0]], dtype=np.int8) 
+                [1, 0, 0]], dtype=np.int8)
   P, L, U = modmat_lu(A, 2)
   np.testing.assert_array_equal(P, A.T)
   np.testing.assert_array_equal(L, np.identity(3, dtype=np.int8))
@@ -172,6 +174,30 @@ if __name__ == '__main__':
   b = np.array([2, 2, 1], dtype=np.int8)
   np.testing.assert_array_equal(modmat_dot(A, x, 3), b)
 
+  #note this A matrix is singular
+  #row1 = 2 X row2 + row3 (mod 3)
+  try: modmat_solve(A, b, 3)
+  except ValueError: failed = True
+  assert(failed)
+
+  # test solve 2x2 matrix mod 7
+  A = np.array( [[3, 1],
+                 [0, 2]], dtype=np.int8)
+  x = np.array([6, 4], dtype=np.int8)
+  b = modmat_dot(A, x, 7)
+  np.testing.assert_array_equal(modmat_solve(A, b, 7), x)
+
+  # test solve 5x5 matrix mod 7
+  A = np.array( [[3, 1, 0, 6, 2],
+                 [0, 2, 2, 1, 4],
+                 [4, 1, 5, 3, 4],
+                 [5, 3, 2, 5, 1],
+                 [1, 1, 4, 3, 1]], dtype=np.int8)
+  x = np.array([6, 4, 3, 3, 3], dtype=np.int8)
+  b = modmat_dot(A, x, 7)
+  np.testing.assert_array_equal(modmat_solve(A, b, 7), x)
+
+  # create a mod 3 light array from blank array
   transition_fn = lambda i, j: [[i,j,2],[i+1,j,1],[i-1,j,1],[i,j+1,1],[i,j-1,1]]
   A = transition_matrix(transition_fn, 3, 3)
   grid = np.array([[0,1,1],[1,0,0],[0,1,1]])
