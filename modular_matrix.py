@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import numpy as np
-from collections import defaultdict
 
 def modmat_mult(C, D, mod):
   (m, n) = C.shape
@@ -15,17 +14,16 @@ def modmat_mult(C, D, mod):
 def modmat_dot(A, x, mod):
   return modmat_mult(A, np.array([x], dtype=np.int8).T, mod).T[0]
 
-moddiv_cache = defaultdict(lambda: defaultdict(dict))
+moddiv_cache = {}
 def mod_divide(a, b, mod):
   if mod not in moddiv_cache:
-    for i in range(mod):
-      for j in range(mod):
-        moddiv_cache[mod][(i * j) % mod][i] = j
-        moddiv_cache[mod][(i * j) % mod][j] = i
+    moddiv_cache[mod] = np.zeros((mod, mod), dtype=np.int8)
+    for i in range(1, mod):
+      for j in range(i, mod):
+        dividend = (i * j) % mod
+        moddiv_cache[mod][dividend, i] = j
+        moddiv_cache[mod][dividend, j] = i
   return moddiv_cache[mod][a][b]
-
-assert(mod_divide(1, 2, 3) == 2)
-assert(mod_divide(2, 1, 3) == 2)
 
 def modmat_fsolve(L, b, mod):
   if not np.all(np.diag(L)):
@@ -81,7 +79,6 @@ def modmat_lu(A, mod):
       L[i,j] = mod_divide(U[i,j], U[j,j], mod)
       for k in range(j, n):
         U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % mod
-
   return P, L, U
 
 def modmat_solve(A, b, mod):
@@ -108,6 +105,10 @@ def transition_matrix(adj_fn, rows, cols):
 
 if __name__ == '__main__':
   print('running tests...')
+
+  #test division
+  assert(mod_divide(1, 2, 3) == 2)
+  assert(mod_divide(2, 1, 3) == 2)
 
   # solving with identity should echo b
   L = np.array([[1, 0],
