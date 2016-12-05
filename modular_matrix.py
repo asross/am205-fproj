@@ -1,18 +1,102 @@
 #!/usr/bin/python
 import numpy as np
 
-def modmat_mult(C, D, mod):
-  (m, n) = C.shape
-  (_, p) = D.shape
-  E = np.zeros((m,p), dtype=np.int8)
-  for i in range(m):
-    for j in range(p):
-      for k in range(n):
-        E[i,j] = (E[i,j] + C[i,k] * D[k,j]) % mod
-  return E
+class ModularMatrix():
+  def __init__(self, array, modulus):
+    self.array = np.array(array) % modulus
+    self.modulus = modulus
 
-def modmat_dot(A, x, mod):
-  return modmat_mult(A, np.array([x], dtype=np.int8).T, mod).T[0]
+  def __getitem__(self, *args, **kwargs):
+    return self.array.__getitem__(*args, **kwargs)
+
+  def __setitem__(self, *args, **kwargs):
+    self.array.__setitem__(*args, **kwargs)
+    self.array = self.array % self.modulus
+
+  def _array(self, o):
+    return o.array if type(o) == self.__class__ else o
+
+  def new(self, array):
+    return self.__class__(array, self.modulus)
+
+  def __add__(self, other):
+    return self.new(np.add(self.array, self._array(other)))
+
+  def __mul__(self, other):
+    return self.new(np.dot(self.array, self._array(other)))
+
+  def dot(self, other):
+    return np.dot(self.array, self._array(other)) % self.modulus
+
+  def solve(self, b):
+    P, L, U = self.lu_factorization()
+    return U.rsolve(L.fsolve(P.dot(b)))
+
+  def rank(self):
+    P, L, U = self.lu_factorization()
+    return np.sum(np.diag(U.array))
+
+  def nullity(self):
+    return self.array.shape[0] - self.rank()
+
+  def fsolve(self, b):
+    L = self.array
+    if not np.all(np.diag(L)):
+      raise ValueError("Matrix is singular")
+    n = L.shape[0]
+    x = np.empty(n, dtype=self.array.dtype)
+    for j in range(n):
+      x[j] = b[j]
+      for k in range(j):
+        x[j] -= L[j, k] * x[k]
+      x[j] = x[j] % self.modulus
+      x[j] = mod_divide(x[j], L[j, j], self.modulus)
+    return x
+
+  def rsolve(self, b):
+    U = self.array
+    if not np.all(np.diag(U)):
+      raise ValueError("Matrix is singular")
+    n = U.shape[0]
+    x = np.empty(n, dtype=self.array.dtype)
+    for j in reversed(range(n)):
+      x[j] = b[j]
+      for k in range(j+1, n):
+        x[j] -= U[j, k] * x[k]
+      x[j] = x[j] % self.modulus
+      x[j] = mod_divide(x[j], U[j, j], self.modulus)
+    return x
+
+  def lu_factorization(self):
+    A = self.array
+    (m,n) = A.shape
+    if m != n: raise ValueError("must pass a square matrix")
+    U = np.copy(A)
+    L = np.identity(n, dtype=self.array.dtype)
+    P = np.identity(n, dtype=self.array.dtype)
+    for j in range(n-1):
+      #select non-zero row
+      for i in range(j, n):
+        if U[i, j] != 0:
+          #swap rows of U
+          temp = np.array(U[j, j:n])
+          U[j, j:n] = U[i, j:n]
+          U[i, j:n] = temp
+          #swap rows of L
+          temp = np.array(L[j, 0:j])
+          L[j, 0:j] = L[i, 0:j]
+          L[i, 0:j] = temp
+          #swap rows of P
+          temp = np.array(P[j, :])
+          P[j, :] = P[i, :]
+          P[i, :] = temp
+          break
+      # Now apply the normal LU operations
+      for i in range(j+1, n):
+        L[i,j] = mod_divide(U[i,j], U[j,j], self.modulus)
+        for k in range(j, n):
+          U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % self.modulus
+    return self.new(P), self.new(L), self.new(U)
 
 moddiv_cache = {}
 def mod_divide(a, b, mod):
@@ -25,84 +109,6 @@ def mod_divide(a, b, mod):
         moddiv_cache[mod][dividend, j] = i
   return moddiv_cache[mod][a][b]
 
-def modmat_fsolve(L, b, mod):
-  if not np.all(np.diag(L)):
-    raise ValueError("Matrix is singular")
-  n = L.shape[0]
-  x = np.empty(n, dtype=np.int8)
-  for j in range(n):
-    x[j] = b[j]
-    for k in range(j):
-      x[j] -= L[j, k] * x[k]
-    x[j] = x[j] % mod
-    x[j] = mod_divide(x[j], L[j, j], mod)
-  return x
-
-def modmat_rsolve(U, b, mod):
-  if not np.all(np.diag(U)):
-    raise ValueError("Matrix is singular")
-  n = U.shape[0]
-  x = np.empty(n, dtype=np.int8)
-  for j in reversed(range(n)):
-    x[j] = b[j]
-    for k in range(j+1, n):
-      x[j] -= U[j, k] * x[k]
-    x[j] = x[j] % mod
-    x[j] = mod_divide(x[j], U[j, j], mod)
-  return x
-
-def modmat_lu(A, mod):
-  (m,n) = A.shape
-  if m != n: raise ValueError("must pass a square matrix")
-  U = np.copy(A)
-  L = np.identity(n, dtype=np.int8)
-  P = np.identity(n, dtype=np.int8)
-  for j in range(n-1):
-    #select non-zero row
-    for i in range(j, n):
-      if U[i, j] != 0:
-        #swap rows of U
-        temp = np.array(U[j, j:n])
-        U[j, j:n] = U[i, j:n]
-        U[i, j:n] = temp
-        #swap rows of L
-        temp = np.array(L[j, 0:j])
-        L[j, 0:j] = L[i, 0:j]
-        L[i, 0:j] = temp
-        #swap rows of P
-        temp = np.array(P[j, :])
-        P[j, :] = P[i, :]
-        P[i, :] = temp
-        break
-    # Now apply the normal LU operations
-    for i in range(j+1, n):
-      L[i,j] = mod_divide(U[i,j], U[j,j], mod)
-      for k in range(j, n):
-        U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % mod
-  return P, L, U
-
-def modmat_solve(A, b, mod):
-  P, L, U = modmat_lu(A, mod)
-  y = modmat_fsolve(L, modmat_dot(P, b, mod), mod)
-  x = modmat_rsolve(U, y, mod)
-  return x
-
-def modmat_rank(A, mod):
-  P, L, U = modmat_lu(A, mod)
-  return np.sum(np.diag(U))
-
-def modmat_nullity(A, mod):
-  return A.shape[0] - modmat_rank(A, mod)
-
-def transition_matrix(adj_fn, rows, cols):
-  A = np.zeros((rows*cols, rows*cols), dtype=np.int8)
-  for row in range(rows):
-    for col in range(cols):
-      for i, j, k in adj_fn(row, col):
-        if 0 <= i < rows and 0 <= j < cols:
-          A[row+col*rows][i+j*rows] = k
-  return A
-
 if __name__ == '__main__':
   print('running tests...')
 
@@ -110,113 +116,111 @@ if __name__ == '__main__':
   assert(mod_divide(1, 2, 3) == 2)
   assert(mod_divide(2, 1, 3) == 2)
 
+  # test operations
+  mm = ModularMatrix(np.identity(3), 3)
+  np.testing.assert_array_equal((mm+3).array, mm.array)
+  np.testing.assert_array_equal((mm+mm+mm+mm).array, mm.array)
+  np.testing.assert_array_equal((mm*mm).array, mm.array)
+  assert(mm[0][0] == 1)
+  mm[0][1] = 1
+  assert(mm[0][1] == 1)
+
   # solving with identity should echo b
-  L = np.array([[1, 0],
-                [0, 1]], dtype=np.int8)
+  L = ModularMatrix(
+      np.array([[1, 0],
+                [0, 1]], dtype=np.int8), 2)
   b = np.array([1, 1], dtype=np.int8)
-  np.testing.assert_array_equal(modmat_fsolve(L, b, 2), b)
+  np.testing.assert_array_equal(L.fsolve(b), b)
 
   # another case where we should echo the same b
-  L = np.array([[1, 0],
-                [1, 1]], dtype=np.int8)
+  L = ModularMatrix(
+      np.array([[1, 0],
+                [1, 1]], dtype=np.int8), 2)
   b = np.array([0, 1], dtype=np.int8)
-  np.testing.assert_array_equal(modmat_fsolve(L, b, 2), b)
+  np.testing.assert_array_equal(L.fsolve(b), b)
 
   # singular
   failed = False
-  L = np.array([[1, 0],
-                [1, 0]], dtype=np.int8)
-  try: modmat_fsolve(L, b, 2)
+  L = ModularMatrix(
+      np.array([[1, 0],
+                [1, 0]], dtype=np.int8), 2)
+  try: L.fsolve(b)
   except ValueError: failed = True
   assert(failed)
 
   # for I, should return 3 Is
-  I =  np.array([[1, 0],
-                 [0, 1]], dtype=np.int8)
-  P, L, U = modmat_lu(I, 2)
-  np.testing.assert_array_equal(P, I)
-  np.testing.assert_array_equal(L, I)
-  np.testing.assert_array_equal(U, I)
+  I = ModularMatrix(
+      np.array([[1, 0],
+                [0, 1]], dtype=np.int8), 2)
+  P, L, U = I.lu_factorization()
+  np.testing.assert_array_equal(P.array, I.array)
+  np.testing.assert_array_equal(L.array, I.array)
+  np.testing.assert_array_equal(U.array, I.array)
 
   # Solution should echo
   x = np.array([1, 0], dtype=np.int8)
-  np.testing.assert_array_equal(x, modmat_solve(I, x, 2))
+  np.testing.assert_array_equal(x, I.solve(x))
 
   # on an upper triangular matrix U, should return U + 2Is
-  A = np.array([[1, 1],
-                [0, 1]], dtype=np.int8)
-  P, L, U = modmat_lu(A, 2)
-  np.testing.assert_array_equal(P, I)
-  np.testing.assert_array_equal(L, I)
-  np.testing.assert_array_equal(U, A)
+  A = ModularMatrix(
+      np.array([[1, 1],
+                [0, 1]], dtype=np.int8), 2)
+  P, L, U = A.lu_factorization()
+  np.testing.assert_array_equal(P.array, I.array)
+  np.testing.assert_array_equal(L.array, I.array)
+  np.testing.assert_array_equal(U.array, A.array)
 
   # on a lower triangular matrix L, should return L + 2Is
-  A = np.array([[1, 0],
-                [1, 1]], dtype=np.int8)
-  P, L, U = modmat_lu(A, 2)
-  np.testing.assert_array_equal(P, I)
-  np.testing.assert_array_equal(L, A)
-  np.testing.assert_array_equal(U, I)
+  A = ModularMatrix(
+      np.array([[1, 0],
+                [1, 1]], dtype=np.int8), 2)
+  P, L, U = A.lu_factorization()
+  np.testing.assert_array_equal(P.array, I.array)
+  np.testing.assert_array_equal(L.array, A.array)
+  np.testing.assert_array_equal(U.array, I.array)
 
   # on a permutation P, it should return P^T + 2Is
-  A = np.array([[0, 1, 0],
+  A = ModularMatrix(
+      np.array([[0, 1, 0],
                 [0, 0, 1],
-                [1, 0, 0]], dtype=np.int8)
-  P, L, U = modmat_lu(A, 2)
-  np.testing.assert_array_equal(P, A.T)
-  np.testing.assert_array_equal(L, np.identity(3, dtype=np.int8))
-  np.testing.assert_array_equal(U, np.identity(3, dtype=np.int8))
+                [1, 0, 0]], dtype=np.int8), 2)
+  P, L, U = A.lu_factorization()
+  np.testing.assert_array_equal(P.array, A.array.T)
+  np.testing.assert_array_equal(L.array, np.identity(3, dtype=np.int8))
+  np.testing.assert_array_equal(U.array, np.identity(3, dtype=np.int8))
 
   # should work for mod 3
-  A = np.array([[0, 1, 2],
+  A = ModularMatrix(
+      np.array([[0, 1, 2],
                 [0, 1, 1],
-                [0, 2, 0]], dtype=np.int8)
+                [0, 2, 0]], dtype=np.int8), 3)
   x = np.array([1, 2, 0], dtype=np.int8)
   b = np.array([2, 2, 1], dtype=np.int8)
-  np.testing.assert_array_equal(modmat_dot(A, x, 3), b)
+  np.testing.assert_array_equal(A.dot(x), b)
 
   #note this A matrix is singular
   #row1 = 2 X row2 + row3 (mod 3)
-  try: modmat_solve(A, b, 3)
+  try: A.solve(b)
   except ValueError: failed = True
   assert(failed)
 
   # test solve 2x2 matrix mod 7
-  A = np.array( [[3, 1],
-                 [0, 2]], dtype=np.int8)
+  A = ModularMatrix(
+      np.array([[3, 1],
+                [0, 2]], dtype=np.int8), 7)
   x = np.array([6, 4], dtype=np.int8)
-  b = modmat_dot(A, x, 7)
-  np.testing.assert_array_equal(modmat_solve(A, b, 7), x)
+  b = A.dot(x)
+  np.testing.assert_array_equal(A.solve(b), x)
 
   # test solve 5x5 matrix mod 7
-  A = np.array( [[3, 1, 0, 6, 2],
+  A = ModularMatrix(
+      np.array( [[3, 1, 0, 6, 2],
                  [0, 2, 2, 1, 4],
                  [4, 1, 5, 3, 4],
                  [5, 3, 2, 5, 1],
-                 [1, 1, 4, 3, 1]], dtype=np.int8)
+                 [1, 1, 4, 3, 1]], dtype=np.int8), 7)
   x = np.array([6, 4, 3, 3, 3], dtype=np.int8)
-  b = modmat_dot(A, x, 7)
-  np.testing.assert_array_equal(modmat_solve(A, b, 7), x)
-
-  # create a mod 3 light array from blank array
-  transition_fn = lambda i, j: [[i,j,2],[i+1,j,1],[i-1,j,1],[i,j+1,1],[i,j-1,1]]
-  A = transition_matrix(transition_fn, 3, 3)
-  grid = np.array([[0,1,1],[1,0,0],[0,1,1]])
-  presses = modmat_solve(A, grid.ravel(), 3)
-  np.testing.assert_array_equal(modmat_dot(A, presses, 3), grid.ravel())
-
-  # print out solving mod 3 light array
-  # note we want to undo the presses that created the pattern mod 3
-  solution_presses = -1 * presses % 3
-  state = grid.ravel()
-  print(state.reshape(grid.shape))
-  for i, n in enumerate(solution_presses):
-    for _ in range(n):
-      press = np.zeros(len(presses), dtype=np.int8)
-      press[i] = 1
-      effect = modmat_dot(A, press, 3)
-      state = (state + effect) % 3
-      print(state.reshape(grid.shape))
-  np.testing.assert_array_equal(state.ravel(), np.zeros(9))
+  b = A.dot(x)
+  np.testing.assert_array_equal(A.solve(b), x)
 
   print('done!')
