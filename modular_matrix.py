@@ -13,8 +13,11 @@ class ModularMatrix():
     self.array.__setitem__(*args, **kwargs)
     self.array = self.array % self.modulus
 
+  def __str__(self):
+    return "ModularMatrix {} %{}\n".format(self.array.shape, self.modulus) + self.array.__str__()
+
   def _array(self, o):
-    return o.array if type(o) == self.__class__ else o
+    return o.array if isinstance(o, self.__class__) else o
 
   def new(self, array):
     return self.__class__(array, self.modulus)
@@ -34,7 +37,7 @@ class ModularMatrix():
 
   def rank(self):
     P, L, U = self.lu_factorization()
-    return np.sum(np.diag(U.array))
+    return np.count_nonzero(np.diag(U.array))
 
   def nullity(self):
     return self.array.shape[0] - self.rank()
@@ -200,6 +203,8 @@ if __name__ == '__main__':
 
   #note this A matrix is singular
   #row1 = 2 X row2 + row3 (mod 3)
+  assert A.rank() == 2
+  assert A.nullity() == 1
   try: A.solve(b)
   except ValueError: failed = True
   assert(failed)
@@ -222,5 +227,7 @@ if __name__ == '__main__':
   x = np.array([6, 4, 3, 3, 3], dtype=np.int8)
   b = A.dot(x)
   np.testing.assert_array_equal(A.solve(b), x)
+  assert A.rank() == 5
+  assert A.nullity() == 0
 
   print('done!')
