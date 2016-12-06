@@ -5,11 +5,13 @@ class ModularMatrix():
   def __init__(self, array, modulus):
     self.array = np.array(array) % modulus
     self.modulus = modulus
+    self.lu_cache = None
 
   def __getitem__(self, *args, **kwargs):
     return self.array.__getitem__(*args, **kwargs)
 
   def __setitem__(self, *args, **kwargs):
+    self.lu_cache = None
     self.array.__setitem__(*args, **kwargs)
     self.array = self.array % self.modulus
 
@@ -71,6 +73,8 @@ class ModularMatrix():
     return x
 
   def lu_factorization(self):
+    if self.lu_cache:
+      return self.lu_cache
     A = self.array
     (m,n) = A.shape
     if m != n: raise ValueError("must pass a square matrix")
@@ -99,7 +103,8 @@ class ModularMatrix():
         L[i,j] = mod_divide(U[i,j], U[j,j], self.modulus)
         for k in range(j, n):
           U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % self.modulus
-    return self.new(P), self.new(L), self.new(U)
+    self.lu_cache = (self.new(P), self.new(L), self.new(U))
+    return self.lu_cache
 
 moddiv_cache = {}
 def mod_divide(a, b, mod):
@@ -229,5 +234,13 @@ if __name__ == '__main__':
   np.testing.assert_array_equal(A.solve(b), x)
   assert A.rank() == 5
   assert A.nullity() == 0
+
+  # test caching behavior
+  assert A.lu_cache
+  A[0, 0] = 5
+  assert not A.lu_cache
+  b = A.dot(x)
+  np.testing.assert_array_equal(A.solve(b), x)
+  assert A.lu_cache
 
   print('done!')
