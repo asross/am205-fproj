@@ -1,7 +1,7 @@
 from modular_matrix import *
 
 def transition_matrix(adj_fn, rows, cols, mod):
-  A = np.zeros((rows*cols, rows*cols), dtype=np.int8)
+  A = np.zeros((rows*cols, rows*cols), dtype=np.int32)
   for row in range(rows):
     for col in range(cols):
       for i, j, k in adj_fn(row, col):
