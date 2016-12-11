@@ -64,9 +64,9 @@
   \right ).
 \]
 
-\paragraph{} 
+\paragraph{} There are many ways to solve this matrix equation; in the case that $A$ is invertible, we can find its inverse $A^{-1}$ and obtain a unique solution $x = A^{-1}b$. Alternatively, we can use a factorization technique such as the LU decomposition to find $x$ more efficiently. In the case that $A$ isn't invertible, then in general it is possible that there may not be any $x$ such that $Ax = b$, and if there is, then $x$ will no longer be unique (although the shortest $x$, i.e. the $x$ that minimizes $\sum x_i$, may still be).
 
-
+\paragraph{} This problem can be readily generalized to board dimensions beyond 5x5, to different transition matrices, and even to non-binary button states. \cite{jaap} (in addition to providing a great analysis of the core mathematics of the game) devotes a significant amount of time to generalizing board dimensions, but fairly little time generalizing the modulus and the transition matrix, so in this project, we aim to explore those areas of inquiry.
 
 
 \begin{thebibliography}{9}
