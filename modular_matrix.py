@@ -54,9 +54,8 @@ class ModularMatrix():
     n = L.shape[0]
     x = np.empty(n, dtype=self.array.dtype)
     for j in range(n):
-      x[j] = b[j]
-      for k in range(j):
-        x[j] -= L[j, k] * x[k]
+      #dot product is faster than looping, extra % is to prevent overflows
+      x[j] = b[j] - np.dot(L[j, :j], x[:j]) % self.modulus
       x[j] = x[j] % self.modulus
       x[j] = mod_divide(x[j], L[j, j], self.modulus)
     return x
@@ -66,9 +65,8 @@ class ModularMatrix():
     n = U.shape[0]
     x = np.empty(n, dtype=self.array.dtype)
     for j in reversed(range(n)):
-      x[j] = b[j]
-      for k in range(j+1, n):
-        x[j] -= U[j, k] * x[k]
+      #dot product is faster than looping, extra % is to prevent overflows
+      x[j] = b[j] - np.dot(U[j, j+1:n], x[j+1:n]) % self.modulus
       x[j] = x[j] % self.modulus
       if U[j, j] == 0: #singular row
         if x[j] == 0: #0 = 0 free parameter, many solutions
@@ -111,8 +109,8 @@ class ModularMatrix():
       # Now apply the normal LU operations
       for i in range(j+1, n):
         L[i,j] = mod_divide(U[i,j], U[j,j], self.modulus)
-        for k in range(j, n):
-          U[i,k] = (U[i,k] - (L[i,j] * U[j,k])) % self.modulus
+        #update row with numpy vector operation
+        U[i, j:n] = (U[i, j:n] - (L[i,j] * U[j, j:n])) % self.modulus
     self.lu_cache = (self.new(P), self.new(L), self.new(U))
     return self.lu_cache
 
