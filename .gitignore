@@ -3,3 +3,6 @@
 images/
 harvard/
 harvard2/
+*.out
+*.log
+*.aux

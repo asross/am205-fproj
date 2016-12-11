@@ -1,6 +1,9 @@
 #!/usr/bin/python
 import numpy as np
 
+class SingularMatrixError(ValueError):
+    pass
+
 class ModularMatrix():
   def __init__(self, array, modulus):
     self.array = np.array(array) % modulus
@@ -47,7 +50,7 @@ class ModularMatrix():
   def fsolve(self, b):
     L = self.array
     if not np.all(np.diag(L)):
-      raise ValueError("Matrix is singular")
+      raise SingularMatrixError("Matrix is singular")
     n = L.shape[0]
     x = np.empty(n, dtype=self.array.dtype)
     for j in range(n):
@@ -74,7 +77,7 @@ class ModularMatrix():
           x[j] = 0
           U[j, j] = 1
         else: #no solutions
-          raise ValueError("Matrix is singular, no solutions")
+          raise SingularMatrixError("No solutions")
       else:
         x[j] = mod_divide(x[j], U[j, j], self.modulus)
     return x
@@ -162,7 +165,7 @@ if __name__ == '__main__':
   try:
     L.fsolve(b)
     assert(False)
-  except ValueError:
+  except SingularMatrixError:
     pass
 
   # for I, should return 3 Is
@@ -235,7 +238,7 @@ if __name__ == '__main__':
   try:
     A.solve(b_no_sol)
     assert(False)
-  except ValueError:
+  except SingularMatrixError:
     pass
 
   # test solve 2x2 matrix mod 7
