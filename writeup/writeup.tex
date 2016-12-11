@@ -66,14 +66,28 @@
 
 \paragraph{} There are many ways to solve this matrix equation; in the case that $A$ is invertible, we can find its inverse $A^{-1}$ and obtain a unique solution $x = A^{-1}b$. Alternatively, we can use a factorization technique such as the LU decomposition to find $x$ more efficiently. In the case that $A$ isn't invertible, then in general it is possible that there may not be any $x$ such that $Ax = b$, and if there is, then $x$ will no longer be unique (although the shortest $x$, i.e. the $x$ that minimizes $\sum x_i$, may still be).
 
-\paragraph{} This problem can be readily generalized to board dimensions beyond 5x5, to different transition matrices, and even to non-binary button states. \cite{jaap} (in addition to providing a great analysis of the core mathematics of the game) devotes a significant amount of time to generalizing board dimensions, but fairly little time generalizing the modulus and the transition matrix, so in this project, we aim to explore those areas of inquiry.
+\paragraph{} This problem can be readily generalized to board dimensions beyond 5x5, to different transition matrices, and even to non-binary button states, which will be the focus of our work.
+
+\subsection*{Previous Work}
+
+\paragraph{} \cite{jaap} provides a great analysis of the core mathematics of the game and devotes a significant amount of time to generalizing board dimensions, with some limited discussion of generalizing number of button states. \cite{giffen} does stuff. \cite{involve} does stuff.
+
+\section*{Quiet Patterns}
+
+\subsection*{For Higher Moduli}
+
+\includegraphics[width=0.67\textwidth]{nullity.png}
 
 
 \begin{thebibliography}{9}
 \bibitem{jaap}
-  Jaap Scherphuis, The Mathematics of Lights Out
-  (\href{http://www.jaapsch.net/puzzles/lomath.htm}{http://www.jaapsch.net/puzzles/lomath.htm}).
-  Accessed 2016.
+  J. Scherphuis, \textit{The Mathematics of Lights Out},
+  \href{http://www.jaapsch.net/puzzles/lomath.htm}{http://www.jaapsch.net/puzzles/lomath.htm}.
+  Accessed December 2016.
+\bibitem{giffen}
+  A. Giffen and D. B. Parker, \textit{On Generalizing the "Lights Out" Game and a Generalization of Parity Domination}, preprint, 2009. Available at \href{http://faculty.gvsu.edu/parkerda/profstuff/papers/hyperlogpd.pdf}{http://faculty.gvsu.edu/parkerda/profstuff/papers/hyperlogpd.pdflink}.
+\bibitem{involve}
+  S. Edwards, V. Elandt, N. James, K. Johnson, Z. Mitchell, and D. Stephenson, \textit{Lights Out on finite graphs}, Involve 3 (2010), 17-32. Available at \href{http://msp.org/involve/2010/3-1/involve-v3-n1-p03-s.pdf}{http://msp.org/involve/2010/3-1/involve-v3-n1-p03-s.pdf}.
 \end{thebibliography}
 
 \end{document}
