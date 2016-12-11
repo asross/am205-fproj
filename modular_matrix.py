@@ -59,9 +59,7 @@ class ModularMatrix():
     return x
 
   def rsolve(self, b):
-    U = self.array
-    if not np.all(np.diag(U)):
-      raise ValueError("Matrix is singular")
+    U = self.array.copy()
     n = U.shape[0]
     x = np.empty(n, dtype=self.array.dtype)
     for j in reversed(range(n)):
@@ -69,7 +67,16 @@ class ModularMatrix():
       for k in range(j+1, n):
         x[j] -= U[j, k] * x[k]
       x[j] = x[j] % self.modulus
-      x[j] = mod_divide(x[j], U[j, j], self.modulus)
+      if U[j, j] == 0: #singular row
+        if x[j] == 0: #0 = 0 free parameter, many solutions
+          print "Warning: matrix is singular, returning one of many solutions"
+          #arbitrarily set x_j = 0
+          x[j] = 0
+          U[j, j] = 1
+        else: #no solutions
+          raise ValueError("Matrix is singular, no solutions")
+      else:
+        x[j] = mod_divide(x[j], U[j, j], self.modulus)
     return x
 
   def lu_factorization(self):
@@ -152,9 +159,11 @@ if __name__ == '__main__':
   L = ModularMatrix(
       np.array([[1, 0],
                 [1, 0]], dtype=np.int8), 2)
-  try: L.fsolve(b)
-  except ValueError: failed = True
-  assert(failed)
+  try:
+    L.fsolve(b)
+    assert(False)
+  except ValueError:
+    pass
 
   # for I, should return 3 Is
   I = ModularMatrix(
@@ -210,9 +219,24 @@ if __name__ == '__main__':
   #row1 = 2 X row2 + row3 (mod 3)
   assert A.rank() == 2
   assert A.nullity() == 1
-  try: A.solve(b)
-  except ValueError: failed = True
-  assert(failed)
+  x2 = A.solve(b)
+  np.testing.assert_array_equal(A.dot(x2), b)
+
+  #test no solution vs many solutions
+  A = ModularMatrix(
+      np.array([[3, 4, 0],
+                [3, 4, 0],
+                [1, 2, 2]], dtype=np.int8), 5)
+  b = np.array([2, 2, 3], dtype=np.int8)
+  x = A.solve(b)
+  np.testing.assert_array_equal(A.dot(x), b)
+
+  b_no_sol = np.array([1, 2, 3], dtype=np.int8)
+  try:
+    A.solve(b_no_sol)
+    assert(False)
+  except ValueError:
+    pass
 
   # test solve 2x2 matrix mod 7
   A = ModularMatrix(
