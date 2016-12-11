@@ -11,19 +11,21 @@ def transition_matrix(adj_fn, rows, cols, mod):
 
 def intermediate_states(A, presses, initial_state):
   state = initial_state.copy()
+  presses_so_far = np.zeros_like(state)
   for i, n in enumerate(presses):
     press = np.zeros(len(presses), dtype=presses.dtype)
     press[i] = 1
     effect = A.dot(press)
     for _ in range(n):
       state = (state + effect) % A.modulus
-      yield state
+      presses_so_far += press
+      yield state, presses_so_far
 
 def all_solution_states(grid, A):
   presses = -1 * A.solve(grid.ravel()) % A.modulus
-  yield grid
-  for state in intermediate_states(A, presses, grid.ravel()):
-    yield state.reshape(grid.shape)
+  yield grid, np.zeros_like(grid)
+  for s, p in intermediate_states(A, presses, grid.ravel()):
+    yield s.reshape(grid.shape), p.reshape(grid.shape)
 
 if __name__ == '__main__':
   print('running tests...')

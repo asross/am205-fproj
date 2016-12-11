@@ -7,9 +7,17 @@ import scipy.misc
 def animate_solution(grid, A, fname='images/img', framerate=5):
   os.system('mkdir -p $(dirname {})'.format(fname))
   i = 0
-  for state in all_solution_states(grid, A):
-    plt.imshow(state, cmap='summer', interpolation='none')
-    plt.title('Step {}'.format(i))
+  for s, p in all_solution_states(grid, A):
+    fig = plt.figure(figsize=(12,4))
+    fig.add_subplot(131)
+    plt.title('Initial State')
+    plt.imshow(grid, cmap='summer', interpolation='none')
+    fig.add_subplot(132)
+    plt.title('Grid at Step {}'.format(i))
+    plt.imshow(s, cmap='summer', interpolation='none')
+    fig.add_subplot(133)
+    plt.title('Presses')
+    plt.imshow(p, cmap='summer', interpolation='none')
     plt.savefig('{}{:05d}'.format(fname, i))
     i += 1
   if os.system('which ffmpeg') == 0:
