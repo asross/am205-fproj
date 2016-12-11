@@ -6,3 +6,4 @@ harvard2/
 *.out
 *.log
 *.aux
+.ipynb_checkpoints/
