@@ -27,8 +27,14 @@ class ModularMatrix():
   def new(self, array):
     return self.__class__(array, self.modulus)
 
+  def copy(self):
+    return self.new(self.array)
+
   def __add__(self, other):
     return self.new(np.add(self.array, self._array(other)))
+
+  def __sub__(self, other):
+    return self.new(np.add(self.array, -1 * self._array(other)))
 
   def __mul__(self, other):
     return self.new(np.dot(self.array, self._array(other)))
@@ -36,9 +42,45 @@ class ModularMatrix():
   def dot(self, other):
     return np.dot(self.array, self._array(other)) % self.modulus
 
-  def solve(self, b):
+  #solve Ax = b with LU factorization and forward/backward substitution
+  #takes in a keyword to decide what to do if the matrix is singular an has many solutions
+  #error (default): throw error
+  #any: return arbitrary solution
+  #basis: find a basis of the solution space
+  #all: find all solutions
+  def solve(self, b, singular_mode="error"):
     P, L, U = self.lu_factorization()
-    return U.rsolve(L.fsolve(P.dot(b)))
+    ndim = self.nullity()
+    #matrix is full rank
+    if ndim == 0:
+      return U.rsolve(L.fsolve(P.dot(b)))
+    #matrix is singular
+    if singular_mode == "error":
+      raise SingularMatrixError("Matrix is singular")
+    #handle multiple solutions
+    Ub = L.fsolve(P.dot(b))
+    if singular_mode == "any":
+      return U.rsolve(Ub, np.zeros(ndim))
+    elif singular_mode == "basis":
+      solutions = np.empty((ndim, self.array.shape[0]), dtype=self.array.dtype)
+      for i in range(ndim):
+        freeParam = np.zeros(ndim)
+        freeParam[i] = 1
+        solutions[i, :] = U.rsolve(Ub, freeParam)
+      return solutions
+    elif singular_mode == "all":
+      solution_count = self.modulus ** ndim
+      solutions = np.empty((solution_count, self.array.shape[0]), dtype=self.array.dtype)
+      for i in range(solution_count):
+        freeParam = np.empty(ndim)
+        solution_id = i
+        for p in range(ndim):
+          freeParam[p] = solution_id % self.modulus
+          solution_id /= self.modulus
+        solutions[i, :] = U.rsolve(Ub, freeParam)
+      return solutions
+    else:
+      raise ValueError("Invalid singular mode: " + singular_mode)
 
   def rank(self):
     P, L, U = self.lu_factorization()
@@ -60,20 +102,21 @@ class ModularMatrix():
       x[j] = mod_divide(x[j], L[j, j], self.modulus)
     return x
 
-  def rsolve(self, b):
+  def rsolve(self, b, freeParam=[]):
     U = self.array.copy()
     n = U.shape[0]
     x = np.empty(n, dtype=self.array.dtype)
+    freeParamCount = 0
     for j in reversed(range(n)):
       #dot product is faster than looping, extra % is to prevent overflows
       x[j] = b[j] - np.dot(U[j, j+1:n], x[j+1:n]) % self.modulus
       x[j] = x[j] % self.modulus
       if U[j, j] == 0: #singular row
         if x[j] == 0: #0 = 0 free parameter, many solutions
-          print "Warning: matrix is singular, returning one of many solutions"
-          #arbitrarily set x_j = 0
-          x[j] = 0
+          #set x_j = specified free parameter
+          x[j] = freeParam[freeParamCount]
           U[j, j] = 1
+          freeParamCount += 1
         else: #no solutions
           raise SingularMatrixError("No solutions")
       else:
@@ -220,8 +263,11 @@ if __name__ == '__main__':
   #row1 = 2 X row2 + row3 (mod 3)
   assert A.rank() == 2
   assert A.nullity() == 1
-  x2 = A.solve(b)
-  np.testing.assert_array_equal(A.dot(x2), b)
+  try:
+    A.solve(b)
+    assert False
+  except SingularMatrixError:
+    pass
 
   #test no solution vs many solutions
   A = ModularMatrix(
@@ -229,13 +275,13 @@ if __name__ == '__main__':
                 [3, 4, 0],
                 [1, 2, 2]], dtype=np.int8), 5)
   b = np.array([2, 2, 3], dtype=np.int8)
-  x = A.solve(b)
+  x = A.solve(b, singular_mode="any")
   np.testing.assert_array_equal(A.dot(x), b)
 
   b_no_sol = np.array([1, 2, 3], dtype=np.int8)
   try:
-    A.solve(b_no_sol)
-    assert(False)
+    A.solve(b_no_sol, singular_mode="any")
+    assert False
   except SingularMatrixError:
     pass
 
