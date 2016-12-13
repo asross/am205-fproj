@@ -25,7 +25,7 @@
 \paragraph{} The effect of any sequence of presses can be represented as a modulo 2 sum of vectors (where each 2D board coordinate is mapped to a 1D vector position), and because summation is commutative, the sequence of presses will have the same effect regardless of its order. We can represent the constraints of the problem as a system of equations in $\mathbb{Z}_2$ (i.e. modular arithmetic on $\{0, 1\}$), which we can more helpfully write as a matrix equation
 
 \begin{equation}
-\text{mod}_2(Ax) = b,
+Ax = b,
 \end{equation}
 
 \noindent where $b = \langle g_{11}, g_{12}, \cdots, g_{15}, g_{21}, \cdots, g_{55} \rangle$ is the length-25 vector of grid states $g_{ij}$, which are 1 if lit and 0 otherwise, $x$ is the length-25 vector of presses, and $A$ is a matrix that encodes the transitions. In the standard Lights Out game, $A_{ij}$ is 1 along the main diagonal and, except at 2D board edges, 1 at positions one and five cells above and below the main diagonal. In the more general case, $A$ can be any matrix encoding transitions, the grid can have any dimensions, and transitions can occur not just in $\mathbb{Z}_2$ (modulo 2) but $\mathbb{Z}_k$.
@@ -56,7 +56,34 @@
 \includegraphics[width=\textwidth]{relprime.png}
 \end{figure}
 
-\paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$, or there is an error in our code.
+\paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$ (or if there is an error in our code).
+
+\section*{Eigengrids and Solution Cycles}
+
+\paragraph{} Eigengrids (with eigenvalue 1) are characterized by the following equation:
+
+\begin{equation}
+Ax = x,
+\end{equation}
+
+\noindent and repeating solution "cycles" (of period $n$) are characterized by:
+
+\begin{equation}
+A^lx = x,
+\end{equation}
+
+\noindent or in other words, $x$ is an eigengrid of $A^n$. For certain dimensions, modulos, and transition functions, we found that $A^n$ commonly tended to equal the identity matrix for some $n$. We also found cases where
+
+\begin{equation}
+\begin{split}
+  A^{n_1 + n_2}x & = A^{n_1}x,\\
+  A^{n}x & \neq x \text{ for all } n,
+\end{split}
+\end{equation}
+
+\noindent that is, where after $n_1$ "iterations" of solving solutions, we would enter a repeating solution cycle with period $n_2$ that didn't contain our initial set of $n_1$ transient states. Below are some examples of each of these cases.
+
+\section*{Visually Appealing Solutions}
 
 \clearpage
 
