@@ -84,7 +84,10 @@ class ModularMatrix():
 
   def rank(self):
     P, L, U = self.lu_factorization()
-    return np.count_nonzero(np.diag(U.array))
+    r = 0
+    for d in np.diag(U.array):
+      r += (gcd(d, self.modulus) == 1)
+    return r
 
   def nullity(self):
     return self.array.shape[0] - self.rank()
@@ -144,7 +147,7 @@ class ModularMatrix():
     for j in range(n-1):
       #select non-zero row
       for i in range(j, n):
-        if U[i, j] != 0:
+        if gcd(U[i, j], self.modulus) == 1:
           #swap rows of U
           temp = np.array(U[j, j:n])
           U[j, j:n] = U[i, j:n]
@@ -177,6 +180,13 @@ def mod_divide(a, b, mod):
         moddiv_cache[mod][dividend, j] = i
   return moddiv_cache[mod][a][b]
 
+#gcd for python 2 support
+def gcd(a, b):
+  while b > 0:
+    temp = b
+    b = a % b
+    a = temp
+  return a
 
 ### Unit Tests ###
 if __name__ == '__main__':
@@ -330,5 +340,42 @@ if __name__ == '__main__':
   b = A.dot(x)
   np.testing.assert_array_equal(A.solve(b), x)
   assert A.lu_cache
+
+  # gcd
+  assert gcd(10, 2) == 2
+  assert gcd(24, 42) == 6
+  assert gcd(7, 1) == 1
+  assert gcd(35, 128) == 1
+
+  # composite modulus
+  # standard transition matrix for 3x3 %6
+  A = ModularMatrix(
+      np.array( [[1,1,0,1,0,0,0,0,0],
+                 [1,1,1,0,1,0,0,0,0],
+                 [0,1,1,0,0,1,0,0,0],
+                 [1,0,0,1,1,0,1,0,0],
+                 [0,1,0,1,1,1,0,1,0],
+                 [0,0,1,0,1,1,0,0,1],
+                 [0,0,0,1,0,0,1,1,0],
+                 [0,0,0,0,1,0,1,1,1],
+                 [0,0,0,0,0,1,0,1,1]], dtype=np.int8), 6)
+  x = np.array([3,4,5,1,2,2,3,2,1])
+  b = (A * x).array
+  np.testing.assert_array_equal(A.solve(b), x)
+
+  # standard transition matrix for 2x2 %6
+  A = ModularMatrix(
+      np.array( [[1, 1, 1, 0],
+                 [1, 1, 0, 1],
+                 [1, 0, 1, 1],
+                 [0, 1, 1, 1]], dtype=np.int8), 6)
+  try:
+    A.solve(np.ones(4, dtype=np.int8))
+    assert False
+  except SingularMatrixError:
+    pass
+
+  assert A.nullity() == 1
+  assert A.rank() == 3
 
   print('done!')
