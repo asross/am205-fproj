@@ -58,6 +58,30 @@ Ax = b,
 
 \paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$ (or if there is an error in our code).
 
+
+\section*{Solving Matrices in a Modular Field}
+
+
+\section*{Singular Transition Matrices}
+\paragraph{} Although LU factorization followed by forward and backward substitution works well for solving full rank matrices, the default procedure does not work for singular matrices.  When exploring the light out problem, we often run into this issue.  For example, consider the transition matrix for the standard 5x5 lights out game.  The matrix has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has a solution space of $2^{23}$ states and null space of $2^2$ states.
+
+
+\paragraph{} We have adapted the algorithm to deal with the singular cases.  The rank of the matrix is equal to the number of non-zero entries along the upper diagonal factor $U$.  Therefore, we may proceed as usual with the standard algorithm until the backward substitution step.  In the backward substitution step, we will run into $n$ zero diagonal entries, where $n$ is the nullity of the original matrix.  These zero diagonal entries correspond to equations of the form $0 = 0$ or $0 = 1$.  In the $0 = 1$ case, the system is inconsistent and has no solutions.  In the $0 = 0$, the system has multiple solutions, because we essentially have an unconstrained free parameter.
+
+
+\paragraph{} Consider a particular zero diagonal entry $U_{ii} = 0$.  We can change the matrix to be no longer singular by setting $U_{ii} = 1$, essentially adding an extra equation to the system.  We do not have any constraint on $x_i$ and can set it to any of value from 0 to $m - 1$ for a field with modulus $m$.  We consider 3 different ways to picking the free parameter $x_i$, and our solve method takes in a flag for which method to use.
+
+\begin{itemize}
+\item Any: We pick all $x_i$ to be 0, which will return an arbitrary solution.
+\item Basis: For each of the $n$ zero diagonal entries, we perform a reverse solve with only that $x_i$ set to 1 and all other free parameters set to 0.  This procedure finds $n$ solutions which form a basis for the nullspace.
+\item All: For each of the $m^n$ possible free parameter choices for $x_i$, we perform a reverse solve.  This procedure finds all possible solutions to the equation.  The number of solutions grows exponentially with the dimensions of the nullspace.
+\end{itemize}
+
+\subsection*{Applications}
+finding eigenvalues and quiet states
+
+
+
 \section*{Eigengrids and Solution Cycles}
 
 \paragraph{} Eigengrids (with eigenvalue 1) are characterized by the following equation:
