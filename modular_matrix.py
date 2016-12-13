@@ -9,6 +9,7 @@ class ModularMatrix():
     self.array = np.array(array) % modulus
     self.modulus = modulus
     self.lu_cache = None
+    self.relatively_prime = [gcd(i, self.modulus) == 1 for i in range(self.modulus)]
 
   def __getitem__(self, *args, **kwargs):
     return self.array.__getitem__(*args, **kwargs)
@@ -84,10 +85,7 @@ class ModularMatrix():
 
   def rank(self):
     P, L, U = self.lu_factorization()
-    r = 0
-    for d in np.diag(U.array):
-      r += (gcd(d, self.modulus) == 1)
-    return r
+    return np.count_nonzero([self.relatively_prime[d] for d in np.diag(U.array)])
 
   def nullity(self):
     return self.array.shape[0] - self.rank()
@@ -147,7 +145,7 @@ class ModularMatrix():
     for j in range(n-1):
       #select non-zero row
       for i in range(j, n):
-        if gcd(U[i, j], self.modulus) == 1:
+        if self.relatively_prime[U[i, j]]:
           #swap rows of U
           temp = np.array(U[j, j:n])
           U[j, j:n] = U[i, j:n]

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from modular_matrix import *
 from transition_helpers import *
 import numpy as np
