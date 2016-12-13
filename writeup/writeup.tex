@@ -1,8 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{fullpage,amsmath,amsfonts,mathpazo,microtype,nicefrac,graphicx,verbatimbox,hyperref,listings,enumitem,amssymb,float,fancyhdr}
 \hypersetup{
-  colorlinks = true,
-  allcolors = {cyan}
+  colorlinks = true
 }
 
 \title{
@@ -29,58 +28,19 @@
 \text{mod}_2(Ax) = b,
 \end{equation}
 
-\noindent where $b = \langle g_{11}, g_{12}, \cdots, g_{15}, g_{21}, \cdots, g_{55} \rangle$ is the length-25 vector of grid states $g_{ij}$, which are 1 if lit and 0 otherwise, $x$ is the length-25 vector of presses, and $A$ is a matrix that encodes the transitions, which looks like
-\begin{equation}
-  A = \left (
-  \setlength{\tabcolsep}{2pt}
-  {\tiny %
-  \begin{tabular}{ccccccccccccccccccccccccc}
-1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-1 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 1\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1\\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1
-    \end{tabular}
-  }
-  \right ).
-  \label{a}
-\end{equation}
+\noindent where $b = \langle g_{11}, g_{12}, \cdots, g_{15}, g_{21}, \cdots, g_{55} \rangle$ is the length-25 vector of grid states $g_{ij}$, which are 1 if lit and 0 otherwise, $x$ is the length-25 vector of presses, and $A$ is a matrix that encodes the transitions. In the standard Lights Out game, $A_{ij}$ is 1 along the main diagonal and, except at 2D board edges, 1 at positions one and five cells above and below the main diagonal. In the more general case, $A$ can be any matrix encoding transitions, the grid can have any dimensions, and transitions can occur not just in $\mathbb{Z}_2$ (modulo 2) but $\mathbb{Z}_k$.
 
 \paragraph{} There are many ways to solve this matrix equation; in the case that $A$ is invertible, we can find its inverse $A^{-1}$ and obtain a unique solution $x = A^{-1}b$. Alternatively, we can use a factorization technique such as the LU decomposition to find $x$ more efficiently. In the case that $A$ isn't invertible, then in general it is possible that there may not be any $x$ such that $Ax = b$, and if there is, then $x$ will no longer be unique (although the shortest $x$, i.e. the $x$ that minimizes $\sum x_i$, may still be).
 
-\subsection*{Previous Work}
+\paragraph{} \cite{jaap} provides a great analysis of the core mathematics of the game and several variants. In particular, \cite{jaap} devotes a significant amount of time to generalizing board dimensions, with some limited discussion of the game in $\mathbb{Z}_3$, which was released as Lights Out 2000. \cite{giffen} and \cite{involve} approach the problem from the perspective of graph theory and graph coloring problems, generalizing it to arbitrary transition matrices in $\mathbb{Z}_k$. A particular focus of \cite{giffen} and \cite{involve} is determining when the game is always winnable, and on methods of generating families of transition graphs with certain properties.
 
-\paragraph{} \cite{jaap} provides a great analysis of the core mathematics of the game and devotes a significant amount of time to generalizing board dimensions, with some limited discussion of generalizing number of button states. \cite{giffen} and \cite{involve} do a significant amount of work generalizing it to arbitrary transition matrices along with an arbitrary number of states by framing it as a graph coloring problem. One problem that \cite{jaap}, \cite{giffen}, and \cite{involve} all focus on is that of determining always-winnability for a given transition matrix $A$, initial grid state $b$, and modular domain $\mathbb{Z}_k$ -- and the dimensionality of the nullspace when it doesn't hold.
+\paragraph{} Our goal is to reproduce and generalize results from \cite{jaap} and confirm they agree with theorems presented in \cite{giffen} and \cite{involve}. We also want to demonstrate a software package we wrote for solving modular systems of equations and visualizing solutions to Lights Out puzzles.
 
-\subsection*{Our Contributions}
+\paragraph{} Additionally, since solutions to light puzzles (arrays of press patterns) can also be interepreted as grids, we consider the recursive problem of solving a grid, then solving its solution, and so on, until we reach a state we have already seen or one that cannot be solved. The simplest version of this (a complete cycle of length 1) corresponds exactly to eigenvectors of the transition matrix with eigenvalue 1. We will explore these cycles of solutions and attempt to relate them to the theoretical work in \cite{jaap}, \cite{giffen}, and \cite{involve}.
 
-\paragraph{} We demonstrate a software package we wrote to solve Lights Out puzzles in $\mathbb{Z}_k$ with arbitrary and even singular (when possible) transition matrices, along with video visualizations of the intermediate states. We reproduce and generalize results tables from \cite{jaap} and confirm that they agree with theorems proved in \cite{giffen} and \cite{involve}.
+\section*{Nullity and Solvability}
 
-\paragraph{} Solutions to light puzzles (arrays of press patterns) can also be interepreted as grids. We consider the recursive problem of solving a grid, then solving its solution, and so on, until we reach a state we have already seen or one that cannot be solved. The simplest version of this (a complete cycle of length 1) corresponds exactly to eigenvectors of the transition matrix with eigenvalue 1. We present our results and attempt to relate them to the theoretical work in \cite{jaap}, \cite{giffen}, and \cite{involve}.
-
-\section*{Solvability and Quiet Patterns}
-
-\paragraph{} \cite{jaap} presents tables of results for the transition matrix \eqref{a} at various dimensions in $\mathbb{Z}_2$ and $\mathbb{Z}_3$. In Figure \ref{nullity}, we reproduce them (up to 15x15) for $\mathbb{Z}_2$ to $\mathbb{Z}_{15}$.
+\paragraph{} As we noted above, when $A$ is invertible, then we can solve the puzzle uniquely for any initial board configuration $b$. When $A$ isn't, we are interested in the dimension of its nullspace. In particular, if the nullspace of $A$ is $d$-dimensional, then there will be $d$ linearly independent press patterns that have no effect on the board. These are referred to as "quiet patterns" in \cite{jaap}, and a basis for them can be determined by augmenting $A$ with the identity matrix and performing Gaussian elimination to transform $A$ as close to the identity as possible.
 
 \begin{figure}
 \caption{Plots of the dimension of the nullspace of the standard Lights Out transition matrix at various grid sizes and moduli}
@@ -88,13 +48,15 @@
 \includegraphics[width=\textwidth]{nullity.png}
 \end{figure}
 
+\paragraph{} The dimension of the nullspace can also be determined by performing modulo-$k$ LU factorization on $A$, then counting the number of nonzero entries in the upper-triangular matrix $U$, which is how we calculate it in practice. We do this in Figure \ref{nullity}, which agrees with the tables of results shown in \cite{jaap} for $k=2$ and $k=3$, but generalizes them up to $k=13$.
+
 \begin{figure}
-\caption{Plots of whether $\text{gcd}(\det(A(m,n)), k) = 1$ for $k,m,n \in \{2,3,...,15\}$}
+\caption{Plots of theoretical predictions for solvability based on \cite{involve}}
 \label{relprime}
 \includegraphics[width=\textwidth]{relprime.png}
 \end{figure}
 
-\paragraph{} Although we generated those results by finding the LU factorization of $A$ at each dimension and modularity, one result from \cite{involve} is that, for solvability to hold for a transition matrix $A$ at any modularity $k$, $\det(A)$ (computed without any modular operations) must be relatively prime to $k$, i.e. $\text{gcd}(\det(A), k) = 1$. We demonstrate this in Figure \ref{relprime} (which can be visually checked against Figure \ref{nullity}).
+\paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$, or there is an error in our code.
 
 \clearpage
 
