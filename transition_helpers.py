@@ -27,6 +27,12 @@ def all_solution_states(grid, A):
   for s, p in intermediate_states(A, presses, grid.ravel()):
     yield s.reshape(grid.shape), p.reshape(grid.shape)
 
+standard_adj = lambda i, j: [[i,j,1],[i+1,j,1],[i-1,j,1],[i,j+1,1],[i,j-1,1]]
+
+def standard_A(mod=2, rows=5, cols=None):
+  if cols is None: cols = rows
+  return transition_matrix(standard_adj, rows, cols, mod)
+
 if __name__ == '__main__':
   print('running tests...')
 
