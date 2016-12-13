@@ -89,6 +89,15 @@ class ModularMatrix():
   def nullity(self):
     return self.array.shape[0] - self.rank()
 
+  #find inverse by solving basis columns
+  def inverse(self):
+    n = self.array.shape[0]
+    I = np.identity(n, dtype=self.array.dtype)
+    inv = np.zeros((n, n), dtype=self.array.dtype)
+    for c in range(n):
+      inv[:, c] = self.solve(I[:, c])
+    return self.new(inv)
+
   def fsolve(self, b):
     L = self.array
     if not np.all(np.diag(L)):
@@ -168,6 +177,8 @@ def mod_divide(a, b, mod):
         moddiv_cache[mod][dividend, j] = i
   return moddiv_cache[mod][a][b]
 
+
+### Unit Tests ###
 if __name__ == '__main__':
   print('running tests...')
 
@@ -305,6 +316,12 @@ if __name__ == '__main__':
   np.testing.assert_array_equal(A.solve(b), x)
   assert A.rank() == 5
   assert A.nullity() == 0
+
+  # matrix inverse
+  Ainv = A.inverse()
+  I = np.identity(5, dtype=np.int8)
+  np.testing.assert_array_equal((A * Ainv).array, I)
+  np.testing.assert_array_equal((Ainv * A).array, I)
 
   # test caching behavior
   assert A.lu_cache
