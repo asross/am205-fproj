@@ -1,5 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{fullpage,amsmath,amsfonts,mathpazo,microtype,nicefrac,graphicx,verbatimbox,hyperref,listings,enumitem,amssymb,float,fancyhdr}
+\newcommand{\na}{$\emptyset$}
+\newcommand{\modZ}[1]{$\mathbb{Z}_{#1}$}
 \hypersetup{
   colorlinks = true
 }
@@ -170,51 +172,92 @@ Ax = x,
 A^nx = x,
 \end{equation}
 
-\noindent or in other words, $x$ is an eigengrid of $A^n$. For certain dimensions, modulos, and transition functions, we found that $A^n$ commonly tended to equal the identity matrix for some $n$. We also found cases where
+\noindent or in other words, $x$ is an eigengrid of $A^n$. For every non-singular $A$ (at least using the standard Lights Out transition matrix), we found that $A^n$ actually always equalled the identity matrix for some $n$ (although there would still be a spectrum of eigenstates of lower powers of $A$).
+
+\paragraph{} For singular matrices $A$, we also found cases where
 
 \begin{equation}
 \begin{split}
   A^{n_1 + n_2}x & = A^{n_1}x,\\
   A^{n}x & \neq x \text{ for all } n,
 \end{split}
+\label{eq:transient}
 \end{equation}
 
-\noindent that is, where after $n_1$ "iterations" of solving solutions, we would enter a repeating solution cycle with period $n_2$ that didn't contain our initial set of $n_1$ transient states.
-
-\paragraph{} Let us consider the example of our normal Lights Out transition matrix $A \% 6$ on a 2x2 grid. We choose this example in part because there are a manageable but large number of possible grids ($6^{2 \times 2} = 1296$), and in part because our calculated nullity for this matrix disagrees with the predictions of \cite{involve}. We will iterate through each of the 1296 possible button grids $b$, solve $Ax=b$, and repeatedly re-solve our solutions until we reach a steady state.
-
-\paragraph{} First, we find that we appear to be able to solve $Ax=b$ for every $b$, despite the fact that $\det(A) = -3$ is not coprime to $k=6$. Second, we find that for this case (unlike the set of solutions at lower values of $k$, which we also calculated), there are many transient states, that, when repeatedly solved, lead to a cycle that does not contain them.
-
-
+\noindent that is, where after $n_1$ "iterations" of solving solutions, we would enter a repeating solution cycle with period $n_2$ that didn't contain our initial set of $n_1$ transient states. In these cases $A^n$ never equalled the identity, which clearly must be true for \eqref{eq:transient} to hold.
 
 \begin{figure}
-\caption{The twelve eigenstates of $A_{\% 6}$ on a 2x2 grid}
-\label{eig622}
-\includegraphics[width=\textwidth]{eig622.png}
+  \caption{Counts of eigenstates of $A^n$ for $2 \times 2$ and $3 \times 3$ grids at various \modZ{k}}
+  \label{eigencounts}
+
+  \begin{center}
+  \begin{tabular}{|l|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{7}{|c|}{\# Eigenstates of $A^n$ for $2 \times 2$ grid} \\ \hline
+    $k, n$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{6}&\textbf{8}&\textbf{Total}\\ \hline
+    \textbf{2}  & 4   & 12   & 0    & 0    & 0    & $16=2^4$ \\ \hline
+    \textbf{3}  & 9   & 18   & 0    & 0    & 0    & $36$ \\ \hline
+    \textbf{4}  & 16  & 112  & 128  & 0    & 0    & $256=4^4$ \\ \hline
+    \textbf{5}  & 25  & 100  & 500  & 0    & 0    & $625=5^4$ \\ \hline
+    \textbf{6}  & 36  & 396  & 0    & 0    & 0    & $432$ \\ \hline
+    \textbf{7}  & 49  & 294  & 0    & 2058 & 0    & $2401=7^4$ \\ \hline
+    \textbf{8}  & 64  & 960  & 1024 & 0    & 2048 & $4096=8^4$ \\ \hline
+    \textbf{9}  & 81  & 648  & 0    & 0    & 0    & $729$ \\ \hline
+    \textbf{10} & 100 & 1900 & 8000 & 0    & 0    & $10000=10^4$ \\ \hline
+  \end{tabular}
+  \vspace{0.5cm}
+
+  \begin{tabular}{|l|l|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{8}{|c|}{\# Eigenstates of $A^n$ for $3 \times 3$ grid} \\ \hline
+    $k, n$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{8}&\textbf{12}&\textbf{24}&\textbf{Total}\\ \hline
+    \textbf{2}  & 8   & 24   & 480    & 0      & 0     & 0       & $512=2^9$ \\ \hline
+    \textbf{3}  & 27  & 0    & 0      & 19656  & 0     & 0       & $19683=3^9$ \\ \hline
+    \textbf{4}  & 64  & 960  & 130048 & 131072 & 0     & 0       & $262144=4^9$ \\ \hline
+    \textbf{5}  & 125 & 0    & 0      & 0      & 78000 & 1875000 & $1953125=5^9$ \\ \hline
+  \end{tabular}
+  \end{center}
 \end{figure}
 
 \begin{figure}
-  \caption{A 3-state transient path ending in a 6-state cycle of $A_{\% 6}$ on a 2x2 grid}
-\label{cycle622}
-\includegraphics[width=\textwidth]{cycle622.png}
+  \caption{Degree to which $A$ is a root of the identity for \modZ{2} and \modZ{3} at various grid sizes}
+  \label{cycles-table}
+  \begin{center}
+  \begin{tabular}{|l|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{7}{|c|}{Identity Root for $A$ in $\mathbb{Z}_2$} \\ \hline
+    $n\times m$&\textbf{2}&\textbf{3}&\textbf{4}&\textbf{5}&\textbf{6}&\textbf{7}\\ \hline
+    \textbf{2} & 2   & & & & & \\ \hline
+    \textbf{3} & \na & 4   & & & & \\ \hline
+    \textbf{4} & 6   & 12  & \na & & & \\ \hline
+    \textbf{5} & \na & \na & 12  & \na & & \\ \hline
+    \textbf{6} & 14  & 28  & 126 & 28  & 14 & \\ \hline
+    \textbf{7} & \na & 8   & 24  & \na & 56 & 8 \\ \hline
+  \end{tabular} \begin{tabular}{|l|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{7}{|c|}{Identity Root for $A$ in $\mathbb{Z}_3$} \\ \hline
+    $n\times m$&\textbf{2}&\textbf{3}&\textbf{4}&\textbf{5}&\textbf{6}&\textbf{7}\\ \hline
+    \textbf{2} & \na & & & & & \\ \hline
+    \textbf{3} & \na & 8   & & & & \\ \hline
+    \textbf{4} & 8   & \na & \na & & & \\ \hline
+    \textbf{5} & \na & \na & 24  & \na & & \\ \hline
+    \textbf{6} & 26  & 728 & 728 & 78  & 26  & \\ \hline
+    \textbf{7} & \na & 80  & \na  & \na & \na & 80 \\ \hline
+  \end{tabular}
+  \end{center}
 \end{figure}
 
 \begin{figure}
-\caption{The twelve 6-state cycles of $A_{\% 6}$ on a 2x2 grid}
-\label{cycle622}
-\includegraphics[width=\textwidth]{all-len-6-cycles-622.png}
+  \caption{Nullity and degree to which $A$ is a root of the identity at various $\mathbb{Z}_k$ and grid sizes}
+  \label{cycles-vs-null}
+  \includegraphics[width=\textwidth]{cycles-vs-nullity-small.png}
 \end{figure}
 
-\begin{tabular}{|l|l|l|l|l|l|}
-  \hline
-  & \multicolumn{5}{|c|}{Sq. Grid Length} \\ \hline
-  $k$ & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\ \hline
-  \textbf{2} & 2 & 4 & 8 & $\emptyset$ & $\emptyset$ \\ \hline
-  \textbf{3} & 3 & $\emptyset$ & 27 & $\emptyset$ & $\emptyset$ \\ \hline
-  \textbf{4} & 4 & 16 & \\ \hline
-  \textbf{5} & 5 & 25 \\ \hline
-\end{tabular}
-
+\begin{figure}
+  \caption{One of many intermediate frames from a solution video to a $64 \times 64$ grid in \modZ{51} with a complicated transition matrix $A_c$. Note that since $A_c$ is invertible, the sequence of presses on the right can be transformed back into the original image, which may be of interest cryptographically.}
+  \label{chr-solution}
+  \includegraphics[width=\textwidth]{img000072418.png}
+\end{figure}
 
 \section*{Visually Appealing Solutions}
 
