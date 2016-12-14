@@ -143,22 +143,7 @@ class ModularMatrix():
     L = np.identity(n, dtype=self.array.dtype)
     P = np.identity(n, dtype=self.array.dtype)
     for j in range(n-1):
-      #select non-zero row
-      for i in range(j, n):
-        if self.relatively_prime[U[i, j]]:
-          #swap rows of U
-          temp = np.array(U[j, j:n])
-          U[j, j:n] = U[i, j:n]
-          U[i, j:n] = temp
-          #swap rows of L
-          temp = np.array(L[j, 0:j])
-          L[j, 0:j] = L[i, 0:j]
-          L[i, 0:j] = temp
-          #swap rows of P
-          temp = np.array(P[j, :])
-          P[j, :] = P[i, :]
-          P[i, :] = temp
-          break
+      self.find_pivot(P, L, U, j, n)
       # Now apply the normal LU operations
       for i in range(j+1, n):
         L[i,j] = mod_divide(U[i,j], U[j,j], self.modulus)
@@ -166,6 +151,37 @@ class ModularMatrix():
         U[i, j:n] = (U[i, j:n] - (L[i,j] * U[j, j:n])) % self.modulus
     self.lu_cache = (self.new(P), self.new(L), self.new(U))
     return self.lu_cache
+
+  def find_pivot(self, P, L, U, j, n):
+    for i in range(j, n):
+      #select non-zero row
+      #in composite case, want a relatively prime pivot for division
+      if self.relatively_prime[U[i, j]]:
+        #swap rows of U
+        temp = np.array(U[j, j:n])
+        U[j, j:n] = U[i, j:n]
+        U[i, j:n] = temp
+        #swap rows of L
+        temp = np.array(L[j, 0:j])
+        L[j, 0:j] = L[i, 0:j]
+        L[i, 0:j] = temp
+        #swap rows of P
+        temp = np.array(P[j, :])
+        P[j, :] = P[i, :]
+        P[i, :] = temp
+        return
+    #no relatively prime pivot available, try random linear combinations
+    #warning, this is not yet a complete check of all linear combinations
+    #give up after 1000 trails, matrix probably singular
+    np.random.seed(0)
+    trials = 0
+    while trials < 1000 and not self.relatively_prime[U[j, j]]:
+      i = np.random.randint(j+1, n)
+      U[j, j:n] = (U[j, j:n] + U[i, j:n]) % self.modulus
+      L[j, 0:j] = (L[j, 0:j] + L[i, 0:j]) % self.modulus
+      P[j, :] = (P[j, :] + P[i, :]) % self.modulus
+      trials += 1
+    return
 
 moddiv_cache = {}
 def mod_divide(a, b, mod):
@@ -375,5 +391,16 @@ if __name__ == '__main__':
 
   assert A.nullity() == 1
   assert A.rank() == 3
+
+  # edge case of linearly combination being nonsingular
+  A = ModularMatrix(
+    np.array( [[2, 3, 0],
+               [3, 1, 1],
+               [3, 0, 2]], dtype=np.int8), 6)
+
+  assert A.nullity() == 0
+  I3 = np.identity(3, dtype=np.int8)
+  Icalc = (A * A.inverse()).array
+  np.testing.assert_array_equal(Icalc, I3)
 
   print('done!')
