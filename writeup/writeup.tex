@@ -1,6 +1,8 @@
 \documentclass[11pt]{article}
-\usepackage{fullpage,amsmath,amsfonts,mathpazo,microtype,nicefrac,graphicx,verbatimbox,hyperref,listings,enumitem,amssymb,float,fancyhdr}
-\newcommand{\na}{$\emptyset$}
+\usepackage{fullpage,amsmath,amsfonts,mathpazo,microtype,nicefrac,graphicx,verbatimbox,hyperref,listings,enumitem,amssymb,float,fancyhdr,xcolor,colortbl}
+\newcommand{\na}{-}
+\definecolor{light-gray}{gray}{0.75}
+\newcommand{\fl}{\cellcolor{light-gray}}
 \newcommand{\modZ}[1]{$\mathbb{Z}_{#1}$}
 \hypersetup{
   colorlinks = true
@@ -176,43 +178,33 @@ A = A^{-1} =
 
 \paragraph{} We briefly explored finding solutions to singular matrices over fields with composite moduli.  The rank of a matrix would now be the number of relatively prime diagonal entries in $U$.  A major challenge is that not all singular values are equivalent, and we have a wide variety of cases beyond $0x = 0$ and $0x =1$.  For example, in mod 6 you can have rows representing equations such as $3x = 0$ which has 3 solutions of 0, 2, and 4, or $2x = 1$ which has no solution.  Even to correctly count the number of solutions is challenging and depends on the particular non-relatively prime values along the diagonal.  Enumerating all the solutions for the composite case may be interesting future work.
 
-\section*{Eigengrids and Solution Cycles}
+\section*{Eigenvectors and Solution Cycles}
 
-\paragraph{} Eigengrids (with eigenvalue 1) are characterized by the following equation:
+\paragraph{} Eigenvectors with eigenvalue 1 are characterized by the following equation:
 
 \begin{equation}
 Ax = x,
 \end{equation}
 
-\noindent and repeating solution "cycles" (of period $n$) are characterized by:
+\noindent where, starting from an unlit board, pressing all of the lit buttons and repeating solution "cycles" (of period $p$) are characterized by:
 
 \begin{equation}
-A^nx = x,
+A^px = x,
 \end{equation}
 
-\noindent or in other words, $x$ is an eigengrid of $A^n$. For every non-singular $A$ (at least using the standard Lights Out transition matrix), we found that $A^n$ actually always equalled the identity matrix for some $n$ (although there would still be a spectrum of eigenstates of lower powers of $A$).
+\noindent or in other words, $x$ is an eigenvector of $A^p$ with eigenvalue 1. For every non-singular $A$ (at least using the standard Lights Out transition matrix), we found that $A^{p'}$ actually always equalled the identity matrix for some $p'$ (although there would still be a spectrum of eigenstates of lower powers of $A$), so that \textit{every} possible grid state is actually part of a solution cycle for some $p \leq p'$.
 
-\paragraph{} For singular matrices $A$, we also found cases where
+\paragraph{} Figure \ref{eigencounts} shows counts of the number of each vector in each cycle of period $p$ (the number of such cycles can be obtained by dividing the cell's value by $p$), for $2 \times 2$ and $3 \times 3$ grids at several \modZ{k}. Note that generating these numbers requires exhaustively iterating through every possible grid (of which there are $k^{mn}$ for an $m \times n$ grid on \modZ{k}), so they can only be computed iteratively for relatively small $k$, $m$, and/or $n$.
 
-\begin{equation}
-\begin{split}
-  A^{n_1 + n_2}x & = A^{n_1}x,\\
-  A^{n}x & \neq x \text{ for all } n,
-\end{split}
-\label{eq:transient}
-\end{equation}
-
-\noindent that is, where after $n_1$ "iterations" of solving solutions, we would enter a repeating solution cycle with period $n_2$ that didn't contain our initial set of $n_1$ transient states. In these cases $A^n$ never equalled the identity, which clearly must be true for \eqref{eq:transient} to hold.
-
-\begin{figure}
-  \caption{Counts of eigenstates of $A^n$ for $2 \times 2$ and $3 \times 3$ grids at various \modZ{k}}
+\begin{figure}[H]
+  \caption{Counts of eigenstates of $A^p$ for $2 \times 2$ and $3 \times 3$ grids at various \modZ{k}}
   \label{eigencounts}
 
   \begin{center}
   \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{7}{|c|}{\# Eigenstates of $A^n$ for $2 \times 2$ grid} \\ \hline
-    $k, n$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{6}&\textbf{8}&\textbf{Total}\\ \hline
+    \multicolumn{7}{|c|}{\# Eigenstates of $A^p$ for $2 \times 2$ grid} \\ \hline
+    $k, p$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{6}&\textbf{8}&\textbf{Total}\\ \hline
     \textbf{2}  & 4   & 12   & 0    & 0    & 0    & $16=2^4$ \\ \hline
     \textbf{3}  & 9   & 18   & 0    & 0    & 0    & $36$ \\ \hline
     \textbf{4}  & 16  & 112  & 128  & 0    & 0    & $256=4^4$ \\ \hline
@@ -227,7 +219,7 @@ A^nx = x,
 
   \begin{tabular}{|l|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{8}{|c|}{\# Eigenstates of $A^n$ for $3 \times 3$ grid} \\ \hline
+    \multicolumn{8}{|c|}{\# Eigenstates of $A^p$ for $3 \times 3$ grid} \\ \hline
     $k, n$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{8}&\textbf{12}&\textbf{24}&\textbf{Total}\\ \hline
     \textbf{2}  & 8   & 24   & 480    & 0      & 0     & 0       & $512=2^9$ \\ \hline
     \textbf{3}  & 27  & 0    & 0      & 19656  & 0     & 0       & $19683=3^9$ \\ \hline
@@ -237,59 +229,76 @@ A^nx = x,
   \end{center}
 \end{figure}
 
-\begin{figure}
-  \caption{Degree to which $A$ is a root of the identity for \modZ{2} and \modZ{3} at various grid sizes}
+\paragraph{} We also iterated through and computed $p'$, the power at which $A^{p'}$ becomes the identity, for many grid sizes and \modZ{k}. Some numerical results are shown in Figure \ref{cycles-table}.
+%In Figure \ref{cycles-vs-null} we also compared when $A^{p'} = \mathbb{1}$ to when $A$ is singular, and verified that when nullity is positive, $A$ can never be a root of the (modular) identity.
+
+\begin{figure}[H]
+  \caption{$p'$ such that $A^{p'}$ is the identity for \modZ{2} and \modZ{3} at various grid sizes}
   \label{cycles-table}
   \begin{center}
   \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{7}{|c|}{Identity Root for $A$ in $\mathbb{Z}_2$} \\ \hline
+    \multicolumn{7}{|c|}{$p'$ s.t. $A^{p'}=\mathbb{1}$ in $\mathbb{Z}_2$} \\ \hline
     $n\times m$&\textbf{2}&\textbf{3}&\textbf{4}&\textbf{5}&\textbf{6}&\textbf{7}\\ \hline
-    \textbf{2} & 2   & & & & & \\ \hline
-    \textbf{3} & \na & 4   & & & & \\ \hline
-    \textbf{4} & 6   & 12  & \na & & & \\ \hline
-    \textbf{5} & \na & \na & 12  & \na & & \\ \hline
-    \textbf{6} & 14  & 28  & 126 & 28  & 14 & \\ \hline
-    \textbf{7} & \na & 8   & 24  & \na & 56 & 8 \\ \hline
+    \textbf{2} & 2   & \fl & \fl & \fl & \fl & \fl \\ \hline
+    \textbf{3} & \na & 4   & \fl & \fl & \fl & \fl \\ \hline
+    \textbf{4} & 6   & 12  & \na & \fl & \fl & \fl \\ \hline
+    \textbf{5} & \na & \na & 12  & \na & \fl & \fl \\ \hline
+    \textbf{6} & 14  & 28  & 126 & 28  & 14  & \fl \\ \hline
+    \textbf{7} & \na & 8   & 24  & \na & 56  & 8   \\ \hline
   \end{tabular} \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{7}{|c|}{Identity Root for $A$ in $\mathbb{Z}_3$} \\ \hline
+    \multicolumn{7}{|c|}{$p'$ s.t. $A^{p'}=\mathbb{1}$ in $\mathbb{Z}_3$} \\ \hline
     $n\times m$&\textbf{2}&\textbf{3}&\textbf{4}&\textbf{5}&\textbf{6}&\textbf{7}\\ \hline
-    \textbf{2} & \na & & & & & \\ \hline
-    \textbf{3} & \na & 8   & & & & \\ \hline
-    \textbf{4} & 8   & \na & \na & & & \\ \hline
-    \textbf{5} & \na & \na & 24  & \na & & \\ \hline
-    \textbf{6} & 26  & 728 & 728 & 78  & 26  & \\ \hline
-    \textbf{7} & \na & 80  & \na  & \na & \na & 80 \\ \hline
+    \textbf{2} & \na & \fl & \fl & \fl & \fl & \fl \\ \hline
+    \textbf{3} & \na & 8   & \fl & \fl & \fl & \fl \\ \hline
+    \textbf{4} & 8   & \na & \na & \fl & \fl & \fl \\ \hline
+    \textbf{5} & \na & \na & 24  & \na & \fl & \fl \\ \hline
+    \textbf{6} & 26  & 728 & 728 & 78  & 26  & \fl \\ \hline
+    \textbf{7} & \na & 80  & \na & \na & \na & 80  \\ \hline
   \end{tabular}
   \end{center}
 \end{figure}
 
-\begin{figure}
-  \caption{Nullity and degree to which $A$ is a root of the identity at various $\mathbb{Z}_k$ and grid sizes}
-  \label{cycles-vs-null}
-  \includegraphics[width=\textwidth]{cycles-vs-nullity-small.png}
-\end{figure}
+%\begin{figure}[H]
+  %\caption{Nullity and $p'$ at various $\mathbb{Z}_k$ and grid sizes}
+  %\label{cycles-vs-null}
+  %\includegraphics[width=\textwidth]{cycles-vs-nullity-small.png}
+%\end{figure}
 
-\begin{figure}
+\paragraph{} For singular matrices $A$, we also found cases where
+
+\begin{equation}
+\begin{split}
+  A^{n_1 + n_2}x & = A^{n_1}x,\\
+  A^{n}x & \neq x \text{ for all } n,
+\end{split}
+\label{eq:transient}
+\end{equation}
+
+\noindent that is, where after $n_1$ "iterations" of solving solutions, we would enter a repeating solution cycle with period $n_2$ that didn't contain our initial set of $n_1$ transient states. In these cases $A^n$ never equalled the identity, which clearly must be true for \eqref{eq:transient} to hold. Some examples are visible in Figures \ref{655-transient} and \ref{655-transient-long}.
+
+\begin{figure}[H]
   \caption{3-state transient path ending in a 6-state cycle of $A$ for \modZ{6} on a $5 \times 5$ grid.}
   \label{655-transient}
   \includegraphics[width=\textwidth]{655-transient.png}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
   \caption{4-state transient path ending in a 12-state cycle of $A$ for \modZ{6} on a $5 \times 5$ grid.}
   \label{655-transient-long}
   \includegraphics[width=\textwidth]{655-transient-long.png}
 \end{figure}
+
+There is also interesting structure in the numbers of transient states. In particular, e.g. for $A$ in \modZ{6} on the $2 \times 2$ grid, for each of the 36 eigenvectors $x$ of $A$, there are two states that transiently lead to $x$, and similarly for the 396 eigenvectors of $A^2$. So altogether, that accounts for all $36+72+396+792=6^4$ possible grids in $2 \times 2$ \modZ{6}. More complex patterns occur at higher grid dimensions and modularities, including cases where states that transiently lead to eigenstates of $A^p$ themselves have states which transiently lead to them -- e.g. at \modZ{9} on the $2 \times 2$ grid, where each of the 81 eigenstates has 2 immediate transient parents, which themselves each have 3 parents, with the exact same pattern holding for the 648 eigenstates of $A^2$.
+
+\section*{Visually Appealing Solutions}
 
 \begin{figure}
   \caption{One of many intermediate frames from a solution video to a $64 \times 64$ grid in \modZ{51} with a complicated transition matrix $A_c$. Note that since $A_c$ is invertible, the sequence of presses on the right can be transformed back into the original image, which may be of interest cryptographically.}
   \label{chr-solution}
   \includegraphics[width=\textwidth]{img000072418.png}
 \end{figure}
-
-\section*{Visually Appealing Solutions}
 
 \clearpage
 
@@ -299,7 +308,7 @@ A^nx = x,
   \href{http://www.jaapsch.net/puzzles/lomath.htm}{http://www.jaapsch.net/puzzles/lomath.htm}.
   Accessed December 2016.
 \bibitem{giffen}
-  A. Giffen and D. B. Parker, \textit{On Generalizing the "Lights Out" Game and a Generalization of Parity Domination}, preprint, 2009. Available at \href{http://faculty.gvsu.edu/parkerda/profstuff/papers/hyperlogpd.pdf}{http://faculty.gvsu.edu/parkerda/profstuff/papers/hyperlogpd.pdflink}.
+  A. Giffen and D. B. Parker, \textit{On Generalizing the "Lights Out" Game and a Generalization of Parity Domination}, preprint, 2009. Available at \href{http://faculty.gvsu.edu/parkerda/profstuff/papers/hyperlogpd.pdf}{http://faculty.gvsu.edu/parkerda/profstuff/papers/hyperlogpd.pdf}.
 \bibitem{involve}
   S. Edwards, V. Elandt, N. James, K. Johnson, Z. Mitchell, and D. Stephenson, \textit{Lights Out on finite graphs}, Involve 3 (2010), 17-32. Available at \href{http://msp.org/involve/2010/3-1/involve-v3-n1-p03-s.pdf}{http://msp.org/involve/2010/3-1/involve-v3-n1-p03-s.pdf}.
 \end{thebibliography}
