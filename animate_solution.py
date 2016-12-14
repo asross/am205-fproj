@@ -18,10 +18,11 @@ def animate_solution(grid, A, fname='images/img', framerate=5):
     fig.add_subplot(133)
     plt.title('Presses')
     plt.imshow(p, cmap='summer', interpolation='none')
-    plt.savefig('{}{:05d}'.format(fname, i))
+    plt.savefig('{}{:09d}'.format(fname, i))
+    plt.close(fig)
     i += 1
   if os.system('which ffmpeg') == 0:
-    os.system('ffmpeg -framerate {} -i {}%05d.png -c:v libx264 -r 30 -pix_fmt yuv420p $(dirname {})/solution.mp4'.format(framerate, fname, fname))
+    os.system('ffmpeg -framerate {} -i {}%09d.png -c:v libx264 -r 30 -pix_fmt yuv420p $(dirname {})/solution.mp4'.format(framerate, fname, fname))
 
 def image_grid(filename, resolution):
     return (scipy.misc.imread(filename, mode='L') * ((resolution-1) / 255.0)).round().astype(np.int8)
