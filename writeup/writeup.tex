@@ -61,6 +61,7 @@ Ax = b,
 \section*{Solving Matrices on a Modular Field}
 
 \subsection*{LU Factorization}
+
 \paragraph{} We have implemented a variant of LU factorization to efficiently solve our transition matrices over a modular field.  The standard LU factorization decomposes the matrix into a product of a lower diagonal matrix $L$ and an upper diagonal matrix $U$.  The decomposed form allows problems of the form $Ax = b$ to be solved efficiently chaining 2 triangular matrix solves.  Triangular matrices can be solved with forward and backward substitution.
 
 
@@ -68,6 +69,7 @@ Ax = b,
 
 
 \subsection*{Partial Pivoting}
+
 \paragraph{} The default LU algorithm quickly runs into issues with zero diagonal entries.  Division by zero is undefined during the elimination step.  The standard solution to deal with zero entries and to improve numerical accuracy is partial pivoting.  Rows are swapped to bring the largest remaining element to the active row, and the final factorization become $PA = LU$ where $P$ is a permutation matrix for the rows.  Because all our arithmetic is performed exactly over a finite field, we don’t particularly care about getting the largest element for numerical stability.  Instead, we just want to get rid of the zero entry on the diagonal.
 
 
@@ -95,6 +97,7 @@ A^{-1} =
 \paragraph{} 1 and 5 are the possible pivot factors which are relatively prime to 6.  None of the entries in the first column of $A$ are suitable as pivot factors.  Intuitively, the problem is that none of rows are suitable for pivoting, but the matrix is not singular because a linear combination of 2 rows is a valid pivot: $2 + 3 = 5$.  There are however a couple entries of 1 in the middle column.
 
 \subsection*{Full Pivoting}
+
 \paragraph{} We next implemented full pivoting to get more choices for possibly pivot factors.  With full pivoting, columns may also be swapped.  The factorization then becomes $PAQ = LU$ where $P$ and $Q$ are the row and column permutation matrices respectively.  In the previous example, full pivoting allows use to move the 1 in the center of the matrix to the active diagonal spot for factorization.  Although full pivoting work is sufficient for over 90\% of the cases we explored, occasionally it still fails to solve an invertible matrix, such as the following matrix in mod 6:
 
 \[
@@ -106,30 +109,45 @@ A = A^{-1} =
 \]
 
 \subsection*{Checking for Linear Combinations}
+
 \paragraph{} To deal with the matrix above, we need to check for linear combinations of rows and columns that may create suitable pivot values.  In our example, $4 + 3 = 1$ mod 6, so adding the two rows will make the matrix solvable.  Systematically checking all the linear combinations is complex and computationally expensive, as the direct approach is exponential with the number of remaining rows.  We instead take a stochastic approach and add 100 random rows in an attempt to create a linear combination with a suitable pivot.  If no suitable pivot is found, we treat the matrix as singular.  In practice this approach solved all the matrices we tried for our experiments.  It may be interesting future work to look into efficient deterministic ways to determine the correct linear combination of rows to take.
 
 
 \paragraph{} It is somewhat surprising that full pivoting alone is not sufficient to solve all non-singular matrices.  An interesting side effect of taking linear combinations of rows is that the row permutation matrix $P$ is no longer strictly a permutation matrix.  $P$ may include extra values representing the linear combinations taken.
 
 \section*{Singular Transition Matrices}
-\paragraph{} Although LU factorization followed by forward and backward substitution works well for solving full rank matrices, the default procedure does not work for singular matrices.  When exploring the light out problem, we often run into this issue.  For example, consider the transition matrix for the standard 5x5 lights out game.  The matrix has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has a solution space of $2^{23}$ states and null space of $2^2$ states.
+
+\paragraph{} Although LU factorization followed by forward and backward substitution works well for solving full rank matrices, the default procedure does not work for singular matrices.  When exploring the light out problem, we often run into this issue.  For example, consider the transition matrix for the standard 5x5 lights out game.  The matrix has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has a solution space of $2^23$ states and null space of $2^2$ states.  We have adapted our algorithm to deal with the singular cases with multiple solutions for a prime modulus.
+
+\subsection*{Multiple Solutions for Prime Modulus}
+
+\paragraph{} The rank of the matrix is equal to the number of non-zero entries along the upper diagonal factor $U$.  Therefore, we may proceed as usual with the standard LU algorithm until the backward substitution step.  In the backward substitution step, we will run into $n$ zero diagonal entries, where $n$ is the nullity of the original matrix.  These zero diagonal entries correspond to equations of the form $0x = 0$ or $0x = 1$.  In the $0x = 1$ case, the system is inconsistent and has no solutions.  In the $0x = 0$, the system has multiple solutions, because we essentially have an unconstrained free parameter.
 
 
-\paragraph{} We have adapted the algorithm to deal with the singular cases.  The rank of the matrix is equal to the number of non-zero entries along the upper diagonal factor $U$.  Therefore, we may proceed as usual with the standard algorithm until the backward substitution step.  In the backward substitution step, we will run into $n$ zero diagonal entries, where $n$ is the nullity of the original matrix.  These zero diagonal entries correspond to equations of the form $0 = 0$ or $0 = 1$.  In the $0 = 1$ case, the system is inconsistent and has no solutions.  In the $0 = 0$, the system has multiple solutions, because we essentially have an unconstrained free parameter.
-
-
-\paragraph{} Consider a particular zero diagonal entry $U_{ii} = 0$.  We can change the matrix to be no longer singular by setting $U_{ii} = 1$, essentially adding an extra equation to the system.  We do not have any constraint on $x_i$ and can set it to any of value from 0 to $m - 1$ for a field with modulus $m$.  We consider 3 different ways to picking the free parameter $x_i$, and our solve method takes in a flag for which method to use.
+\paragraph{} Let $z_1, z_2, \dots, z_n$ be the indices for the singular diagonal entries, i.e. $U_{z_i, z_i} = 0$.  We can change the matrix to be no longer singular by setting $U_{z_i, z_i} = 1$, essentially adding an extra equation to the system.  We do not have any constraint on $x_{z_i}$ and can set it to any of value from 0 to $m - 1$ for a field with prime modulus $m$.  We consider 3 different ways to picking the free parameter $x_{z_i}$.  Our solve method implementation takes in a flag for which method to use.
 
 \begin{itemize}
-\item Any: We pick all $x_i$ to be 0, which will return an arbitrary solution.
-\item Basis: For each of the $n$ zero diagonal entries, we perform a reverse solve with only that $x_i$ set to 1 and all other free parameters set to 0.  This procedure finds $n$ solutions which form a basis for the nullspace.
-\item All: For each of the $m^n$ possible free parameter choices for $x_i$, we perform a reverse solve.  This procedure finds all possible solutions to the equation.  The number of solutions grows exponentially with the dimensions of the nullspace.
+\item Any: We pick all $x_{z_i}$ to be 0, which will return an arbitrary solution.
+\item Basis: For each of the $n$ zero diagonal entries, we perform a reverse solve with a single $x_{z_i}$ set to 1 and all other free parameters $x_{z_j} \> (j \ne i)$ set to 0.  This procedure finds $n$ solutions which form a basis for the nullspace.
+\item All: For each of the $m^n$ possible free parameter choices for $x_{z_i}$, we perform a reverse solve.  This procedure finds all possible solutions to the equation.  The number of solutions grows exponentially with the dimensions of the nullspace.
 \end{itemize}
 
 \subsection*{Applications}
-finding eigenvalues and quiet states
+
+TODO
 
 
+Applications of finding multiple solutions of a singular matrix include finding eigenvalues and quiet states.
+
+
+The 5x5 cases has a nullity of 2.
+
+
+We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors.
+
+\subsection*{Challenges with Composite Modulus}
+
+\paragraph{} We briefly explored finding solutions to singular matrices over fields with composite moduli.  The rank of a matrix would now be the number of relatively prime diagonal entries in $U$.  A major challenge is that not all singular values are equivalent, and we have a wide variety of cases beyond $0x = 0$ and $0x =1$.  For example, in mod 6 you can have rows representing equations such as $3x = 0$ which has 3 solutions of 0, 2, and 4, or $2x = 1$ which has no solution.  Even to correctly count the number of solutions is challenging and depends on the particular non-relatively prime values along the diagonal.  Enumerating all the solutions for the composite case may be interesting future work.
 
 \section*{Eigengrids and Solution Cycles}
 
