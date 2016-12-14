@@ -58,8 +58,57 @@ Ax = b,
 
 \paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$ (or if there is an error in our code).
 
+\section*{Solving Matrices on a Modular Field}
 
-\section*{Solving Matrices in a Modular Field}
+\subsection*{LU Factorization}
+\paragraph{} We have implemented a variant of LU factorization to efficiently solve our transition matrices over a modular field.  The standard LU factorization decomposes the matrix into a product of a lower diagonal matrix $L$ and an upper diagonal matrix $U$.  The decomposed form allows problems of the form $Ax = b$ to be solved efficiently chaining 2 triangular matrix solves.  Triangular matrices can be solved with forward and backward substitution.
+
+
+\paragraph{} Since the standard LU algorithm is well known, we will focus our attention on the details for implementing it over a modular field.  Addition, subtraction, and multiplication can all be carried on as usual with an additional modulo step at the end to keep the result in the valid range.  The major challenge of LU factorization over a modular field that we faced was handling division.  Division should be treated as the inverse of multiplication.  For example $3 / 2 = 4$ in mod 5, because $2 \times 4 = 3$.  Because we explored relatively small moduli, we precomputed the appropriate division tables by looping over all the pairwise multiplications.
+
+
+\subsection*{Partial Pivoting}
+\paragraph{} The default LU algorithm quickly runs into issues with zero diagonal entries.  Division by zero is undefined during the elimination step.  The standard solution to deal with zero entries and to improve numerical accuracy is partial pivoting.  Rows are swapped to bring the largest remaining element to the active row, and the final factorization become $PA = LU$ where $P$ is a permutation matrix for the rows.  Because all our arithmetic is performed exactly over a finite field, we don’t particularly care about getting the largest element for numerical stability.  Instead, we just want to get rid of the zero entry on the diagonal.
+
+
+\paragraph{} A naive first attempt is to swap a row with zero diagonal entry with any row containing a non-zero entry in the corresponding spot.  This method works perfectly well for a prime modulus, but we run into issues with composite moduli.  For example, consider $1 / 2$ mod 6.  There is no solution satisfying $2x = 1$ in mod 6.  This undefined division becomes a problem if 2 is a diagonal entry.  Therefore, we require that the pivots values for the diagonal be relatively prime to the modulus.
+
+
+\paragraph{} As a second pass, we use partial pivoting to select a row to make the diagonal entry relatively prime to the modulus.  We implemented Euclid’s algorithm to find the greatest common factor.  It turns out that this solution works when the modulus is prime or a power of a prime.  The solution solves many matrices with other composite moduli, but runs into some issues.  Consider the following example of an invertible matrix in mod 6:
+
+\[
+A =
+\begin{pmatrix}
+2 & 3 & 0 \\
+3 & 1 & 1 \\
+3 & 0 & 2
+\end{pmatrix}
+\quad
+A^{-1} =
+\begin{pmatrix}
+2 & 0 & 3 \\
+3 & 4 & 4 \\
+3 & 3 & 5
+\end{pmatrix}
+\]
+
+\paragraph{} 1 and 5 are the possible pivot factors which are relatively prime to 6.  None of the entries in the first column of $A$ are suitable as pivot factors.  Intuitively, the problem is that none of rows are suitable for pivoting, but the matrix is not singular because a linear combination of 2 rows is a valid pivot: $2 + 3 = 5$.  There are however a couple entries of 1 in the middle column.
+
+\subsection*{Full Pivoting}
+\paragraph{} We next implemented full pivoting to get more choices for possibly pivot factors.  With full pivoting, columns may also be swapped.  The factorization then becomes $PAQ = LU$ where $P$ and $Q$ are the row and column permutation matrices respectively.  In the previous example, full pivoting allows use to move the 1 in the center of the matrix to the active diagonal spot for factorization.  Although full pivoting work is sufficient for over 90\% of the cases we explored, occasionally it still fails to solve an invertible matrix, such as the following matrix in mod 6:
+
+\[
+A = A^{-1} =
+\begin{pmatrix}
+4 & 3 \\
+3 & 4
+\end{pmatrix}
+\]
+
+\subsection*{Checking for Linear Combinations}
+To deal with the matrix above, we need to check for linear combinations of rows and columns that may create suitable pivot values.  In our example, $4 + 3 = 1$ mod 6, so adding the two rows will make the matrix solvable.  Systematically checking all the linear combinations is complex and computationally expensive, as the direct approach is exponential with the number of remaining rows.  We instead take a stochastic approach and add 100 random rows in an attempt to create a linear combination with a suitable pivot.  If no suitable pivot is found, we treat the matrix as singular.
+
+In practice this approach solved all the matrices we tried for our experiments.  It may be interesting future work to look into efficient deterministic ways to determine the correct linear combination of rows to take.
 
 
 \section*{Singular Transition Matrices}
