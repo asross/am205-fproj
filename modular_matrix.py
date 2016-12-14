@@ -50,24 +50,24 @@ class ModularMatrix():
   #basis: find a basis of the solution space
   #all: find all solutions
   def solve(self, b, singular_mode="error"):
-    P, L, U = self.lu_factorization()
+    P, Q, L, U = self.lu_factorization()
     ndim = self.nullity()
     #matrix is full rank
     if ndim == 0:
-      return U.rsolve(L.fsolve(P.dot(b)))
+      return Q.dot(U.rsolve(L.fsolve(P.dot(b))))
     #matrix is singular
     if singular_mode == "error":
       raise SingularMatrixError("Matrix is singular")
     #handle multiple solutions
     Ub = L.fsolve(P.dot(b))
     if singular_mode == "any":
-      return U.rsolve(Ub, np.zeros(ndim))
+      return Q.dot(U.rsolve(Ub, np.zeros(ndim)))
     elif singular_mode == "basis":
       solutions = np.empty((ndim, self.array.shape[0]), dtype=self.array.dtype)
       for i in range(ndim):
         freeParam = np.zeros(ndim)
         freeParam[i] = 1
-        solutions[i, :] = U.rsolve(Ub, freeParam)
+        solutions[i, :] = Q.dot(U.rsolve(Ub, freeParam))
       return solutions
     elif singular_mode == "all":
       solution_count = self.modulus ** ndim
@@ -78,13 +78,13 @@ class ModularMatrix():
         for p in range(ndim):
           freeParam[p] = solution_id % self.modulus
           solution_id /= self.modulus
-        solutions[i, :] = U.rsolve(Ub, freeParam)
+        solutions[i, :] = Q.dot(U.rsolve(Ub, freeParam))
       return solutions
     else:
       raise ValueError("Invalid singular mode: " + singular_mode)
 
   def rank(self):
-    P, L, U = self.lu_factorization()
+    P, Q, L, U = self.lu_factorization()
     return np.count_nonzero([self.relatively_prime[d] for d in np.diag(U.array)])
 
   def nullity(self):
@@ -142,46 +142,51 @@ class ModularMatrix():
     U = np.copy(A)
     L = np.identity(n, dtype=self.array.dtype)
     P = np.identity(n, dtype=self.array.dtype)
+    Q = np.identity(n, dtype=self.array.dtype)
     for j in range(n-1):
-      self.find_pivot(P, L, U, j, n)
+      self.find_pivot(P, Q, L, U, j, n)
       # Now apply the normal LU operations
       for i in range(j+1, n):
         L[i,j] = mod_divide(U[i,j], U[j,j], self.modulus)
         #update row with numpy vector operation
         U[i, j:n] = (U[i, j:n] - (L[i,j] * U[j, j:n])) % self.modulus
-    self.lu_cache = (self.new(P), self.new(L), self.new(U))
+    self.lu_cache = (self.new(P), self.new(Q), self.new(L), self.new(U))
     return self.lu_cache
 
-  def find_pivot(self, P, L, U, j, n):
-    for i in range(j, n):
-      #select non-zero row
-      #in composite case, want a relatively prime pivot for division
-      if self.relatively_prime[U[i, j]]:
-        #swap rows of U
-        temp = np.array(U[j, j:n])
-        U[j, j:n] = U[i, j:n]
-        U[i, j:n] = temp
-        #swap rows of L
-        temp = np.array(L[j, 0:j])
-        L[j, 0:j] = L[i, 0:j]
-        L[i, 0:j] = temp
-        #swap rows of P
-        temp = np.array(P[j, :])
-        P[j, :] = P[i, :]
-        P[i, :] = temp
-        return
-    #no relatively prime pivot available, try random linear combinations
-    #warning, this is not yet a complete check of all linear combinations
-    #give up after 1000 trails, matrix probably singular
-    np.random.seed(0)
-    trials = 0
-    while trials < 1000 and not self.relatively_prime[U[j, j]]:
-      i = np.random.randint(j+1, n)
-      U[j, j:n] = (U[j, j:n] + U[i, j:n]) % self.modulus
-      L[j, 0:j] = (L[j, 0:j] + L[i, 0:j]) % self.modulus
-      P[j, :] = (P[j, :] + P[i, :]) % self.modulus
-      trials += 1
-    return
+  #select non-zero pivot
+  #in composite case, want a relatively prime pivot for division
+  def find_pivot(self, P, Q, L, U, j, n):
+    for c in range(j, n): #column
+      for i in range(j, n): #row
+        if self.relatively_prime[U[i, c]]:
+          #swap rows of U
+          temp = np.array(U[j, j:n])
+          U[j, j:n] = U[i, j:n]
+          U[i, j:n] = temp
+          #swap rows of L
+          temp = np.array(L[j, 0:j])
+          L[j, 0:j] = L[i, 0:j]
+          L[i, 0:j] = temp
+          #swap rows of P
+          temp = np.array(P[j, :])
+          P[j, :] = P[i, :]
+          P[i, :] = temp
+
+          #swap columns of U
+          temp = np.array(U[:, j])
+          U[:, j] = U[:, c]
+          U[:, c] = temp
+          #swap columns of L
+          temp = np.array(L[0:j, j])
+          L[0:j, j] = L[0:j, c]
+          L[0:j, c] = temp
+          #swap columns of Q
+          temp = np.array(Q[:, j])
+          Q[:, j] = Q[:, c]
+          Q[:, c] = temp
+
+          return
+
 
 moddiv_cache = {}
 def mod_divide(a, b, mod):
@@ -248,8 +253,9 @@ if __name__ == '__main__':
   I = ModularMatrix(
       np.array([[1, 0],
                 [0, 1]], dtype=np.int8), 2)
-  P, L, U = I.lu_factorization()
+  P, Q, L, U = I.lu_factorization()
   np.testing.assert_array_equal(P.array, I.array)
+  np.testing.assert_array_equal(Q.array, I.array)
   np.testing.assert_array_equal(L.array, I.array)
   np.testing.assert_array_equal(U.array, I.array)
 
@@ -261,8 +267,9 @@ if __name__ == '__main__':
   A = ModularMatrix(
       np.array([[1, 1],
                 [0, 1]], dtype=np.int8), 2)
-  P, L, U = A.lu_factorization()
+  P, Q, L, U = A.lu_factorization()
   np.testing.assert_array_equal(P.array, I.array)
+  np.testing.assert_array_equal(Q.array, I.array)
   np.testing.assert_array_equal(L.array, I.array)
   np.testing.assert_array_equal(U.array, A.array)
 
@@ -270,8 +277,9 @@ if __name__ == '__main__':
   A = ModularMatrix(
       np.array([[1, 0],
                 [1, 1]], dtype=np.int8), 2)
-  P, L, U = A.lu_factorization()
+  P, Q, L, U = A.lu_factorization()
   np.testing.assert_array_equal(P.array, I.array)
+  np.testing.assert_array_equal(Q.array, I.array)
   np.testing.assert_array_equal(L.array, A.array)
   np.testing.assert_array_equal(U.array, I.array)
 
@@ -280,8 +288,9 @@ if __name__ == '__main__':
       np.array([[0, 1, 0],
                 [0, 0, 1],
                 [1, 0, 0]], dtype=np.int8), 2)
-  P, L, U = A.lu_factorization()
+  P, Q, L, U = A.lu_factorization()
   np.testing.assert_array_equal(P.array, A.array.T)
+  np.testing.assert_array_equal(Q.array, np.identity(3, dtype=np.int8))
   np.testing.assert_array_equal(L.array, np.identity(3, dtype=np.int8))
   np.testing.assert_array_equal(U.array, np.identity(3, dtype=np.int8))
 
