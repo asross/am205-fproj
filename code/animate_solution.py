@@ -5,10 +5,10 @@ import os
 import matplotlib.pyplot as plt
 import scipy.misc
 
-def animate_solution(grid, A, fname='images/img', framerate=5):
+def animate_solution(grid, A, fname='images/img', framerate=5, order=None):
   os.system('mkdir -p $(dirname {})'.format(fname))
   i = 0
-  for s, p in all_solution_states(grid, A):
+  for s, p in all_solution_states(grid, A, order):
     fig = plt.figure(figsize=(12,4))
     fig.add_subplot(131)
     plt.title('Initial State')

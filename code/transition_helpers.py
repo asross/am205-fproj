@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #utilities to generate various lights out grids
 from modular_matrix import *
+import random
 
 def transition_matrix(adj_fn, rows, cols, mod):
   A = np.zeros((rows*cols, rows*cols), dtype=np.int32)
@@ -11,10 +12,14 @@ def transition_matrix(adj_fn, rows, cols, mod):
           A[row+col*rows][i+j*rows] = k
   return ModularMatrix(A, mod)
 
-def intermediate_states(A, presses, initial_state):
+def intermediate_states(A, presses, initial_state, order=None):
   state = initial_state.copy()
   presses_so_far = np.zeros_like(state)
-  for i, n in enumerate(presses):
+  press_order = list(range(len(presses)))
+  if order == 'random':
+    random.shuffle(press_order)
+  for i in press_order:
+    n = presses[i]
     press = np.zeros(len(presses), dtype=presses.dtype)
     press[i] = 1
     effect = A.dot(press)
@@ -23,10 +28,10 @@ def intermediate_states(A, presses, initial_state):
       presses_so_far += press
       yield state, presses_so_far
 
-def all_solution_states(grid, A):
+def all_solution_states(grid, A, order=None):
   presses = -1 * A.solve(grid.ravel()) % A.modulus
   yield grid, np.zeros_like(grid)
-  for s, p in intermediate_states(A, presses, grid.ravel()):
+  for s, p in intermediate_states(A, presses, grid.ravel(), order):
     yield s.reshape(grid.shape), p.reshape(grid.shape)
 
 standard_adj = lambda i, j: [[i,j,1],[i+1,j,1],[i-1,j,1],[i,j+1,1],[i,j-1,1]]

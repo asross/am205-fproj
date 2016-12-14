@@ -10,7 +10,7 @@
 
 \title{
 \vspace{1cm}
-\textmd{\textbf{AM205 Final Project: Modulo-n Lights Out}}\\
+\textmd{\textbf{AM205 Final Project: Modulo-k Lights Out}}\\
 }
 
 \author{\textbf{Shawn Pan and Andrew Ross}}
@@ -292,14 +292,20 @@ There is also interesting structure in the numbers of transient states. For exam
 
 \paragraph{} We can summarize and analyze these results by considering how $A$ implicitly organizes the $k^{mn}$ button grid states into a graph (where you transition between states by applying $A$). In the case when $A$ is invertible, the state space is entirely divided into disconnected rings, with $k^n$ tiny rings of size 1 that consist of (not necessarily independent) eigenstates of $A$, and more rings that correspond to eigenstates of $A^p$. When $A$ is singular, there still appear to be disconnected rings of eigenstates of $A^p$ (and there are still $k^n$ eigenstates of $A$), but they do not constitute the entirety of the state space, and instead the rest of the states form trees branching off of each ring state, seemingly with equal branching factor everywhere (although we only considered a few examples). Future work would ideally analyze this structure theoretically, rather than experimentally.
 
-\section*{Visually Appealing Solutions}
+\section*{Generating Solution Videos}
 
-We also generated cool plots...
+We also explored methods of visualizing solutions to these variants of Lights Out, including automatically generating video using sequences of \href{http://matplotlib.org/index.html}{matplotlib} figures and \href{https://ffmpeg.org/}{ffmpeg} to join them together. We also experimented with transforming images into grids for solving. Note that since the order of button presses is arbitrary, each grid can be solved in whatever manner is most visually appealing. Frames from several examples are shown below in Figures \ref{chr-solution} and \ref{harvard-solution}.
 
 \begin{figure}[H]
   \caption{One of many intermediate frames from a solution video to a $64 \times 64$ grid in \modZ{51} with a complicated transition matrix $A_c$. A full video is available at \href{https://goo.gl/z2jQuk}{goo.gl/z2jQuk}. Note that since $A_c$ is invertible, the sequence of presses on the right can be transformed back into the original image, which may be of cryptographic interest.}
   \label{chr-solution}
   \includegraphics[width=\textwidth]{img000072418.png}
+\end{figure}
+
+\begin{figure}[H]
+  \caption{An early frame from a solution video where the presses occur in a random order. Full video available at \href{https://goo.gl/rT1z23}{goo.gl/rT1z23}.}
+  \label{harvard-solution}
+  \includegraphics[width=\textwidth]{img000000125.png}
 \end{figure}
 
 \section*{Conclusion}
