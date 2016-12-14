@@ -16,11 +16,12 @@ print A5.solve(np.zeros(25), singular_mode="any")
 print "Basis Mode"
 print A5.solve(np.zeros(25), singular_mode="basis")
 print "All Mode"
-print A5.solve(np.zeros(25), singular_mode="all")
-print
+A5quiet = A5.solve(np.zeros(25), singular_mode="all")
+print A5quiet
 
 print "Eigenvectors for 7x7"
 print "Any Mode"
 print A7eig.solve(np.zeros(49), singular_mode="any")
 print "Basis Mode"
-print A7eig.solve(np.zeros(49), singular_mode="basis")
+A7eigbasis = A7eig.solve(np.zeros(49), singular_mode="basis")
+print A7eigbasis

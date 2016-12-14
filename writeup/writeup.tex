@@ -141,18 +141,28 @@ A = A^{-1} =
 \item All: For each of the $m^n$ possible free parameter choices for $x_{z_i}$, we perform a reverse solve.  This procedure finds all possible solutions to the equation.  The number of solutions grows exponentially with the dimensions of the nullspace.
 \end{itemize}
 
-\subsection*{Applications}
-
-TODO
-
+\subsection*{Applications of Finding Multiple Solutions}
 
 Applications of finding multiple solutions of a singular matrix include finding eigenvalues and quiet states.
 
 
 The 5x5 cases has a nullity of 2.
 
+\begin{figure}
+\caption{Plots of all quiet states for the standard 5x5 game.  Agrees with results from \cite{jaap}}
+\label{quiet55}
+\includegraphics[width=4in]{quiet55.png}
+\end{figure}
+
 
 We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors.
+
+\begin{figure}
+\caption{Plots of the 7 basis eigenvectors of the standard 7x7 game.}
+\label{eigbasis77}
+\includegraphics[width=\textwidth]{eigbasis77.png}
+\end{figure}
+
 
 \subsection*{Challenges with Composite Modulus}
 
