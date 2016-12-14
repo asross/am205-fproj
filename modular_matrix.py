@@ -186,6 +186,17 @@ class ModularMatrix():
           Q[:, c] = temp
 
           return
+    #no relatively prime pivot available, try random linear combinations
+    #warning, this is not yet a complete check of all linear combinations
+    #give up after 100 trials, matrix probably singular
+    np.random.seed(0)
+    trials = 0
+    while trials < 100 and not self.relatively_prime[U[j, j]]:
+      i = np.random.randint(j+1, n)
+      U[j, j:n] = (U[j, j:n] + U[i, j:n]) % self.modulus
+      L[j, 0:j] = (L[j, 0:j] + L[i, 0:j]) % self.modulus
+      P[j, :] = (P[j, :] + P[i, :]) % self.modulus
+      trials += 1
 
 
 moddiv_cache = {}
