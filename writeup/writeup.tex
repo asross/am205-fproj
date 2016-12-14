@@ -51,12 +51,19 @@ Ax = b,
 \paragraph{} The dimension of the nullspace can also be determined by performing modulo-$k$ LU factorization on $A$, then counting the number of nonzero entries in the upper-triangular matrix $U$, which is how we calculate it in practice. We do this in Figure \ref{nullity}, which agrees with the tables of results shown in \cite{jaap} for $k=2$ and $k=3$, but generalizes them up to $k=13$.
 
 \begin{figure}
-\caption{Plots of theoretical predictions for solvability based on \cite{involve}}
+\caption{Plots of theoretical predictions for solvability based on \cite{involve}  The relatively prime entries are in blue.}
 \label{relprime}
 \includegraphics[width=\textwidth]{relprime.png}
 \end{figure}
 
 \paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$ (or if there is an error in our code).
+
+\begin{figure}
+\caption{Comparison of full rank grid sizes for the standard transition matrix for mod 2, mod 3, and mod 6}
+\label{overlap236}
+\includegraphics[width=\textwidth]{mod6overlap.png}
+\end{figure}
+
 
 \section*{Solving Matrices on a Modular Field}
 
