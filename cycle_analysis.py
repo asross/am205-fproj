@@ -68,15 +68,15 @@ def plot_state(s,t=0.1,fs=30):
       plt.gca().text(i-t, j+t, int(s[j][i]), fontsize=fs)
   plt.imshow(s, cmap='summer', interpolation='none')
 
-def draw_state_group_border(wadj):
+def draw_state_group_border(wadj, pad=0.1):
   sub = plt.gca()
   ax = sub.axis()
   width = ax[1]-ax[0]
   height = ax[3]-ax[2]
   rec = plt.Rectangle(
-    (ax[0]-wadj*width, ax[2]-0.1*height),
-    (wadj+1.1)*width,
-    1.2*height,
+    (ax[0]-wadj*width, ax[2]-pad*height),
+    (wadj+1+pad)*width,
+    (1+2*pad)*height,
     fill=False,lw=1)
   rec = sub.add_patch(rec)
   rec.set_clip_on(False)
