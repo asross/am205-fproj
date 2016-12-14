@@ -52,7 +52,7 @@ Ax = b,
 \includegraphics[width=\textwidth]{nullity.png}
 \end{figure}
 
-\paragraph{} The dimension of the nullspace can also be determined by performing modulo-$k$ LU factorization on $A$, then counting the number of nonzero entries in the upper-triangular matrix $U$, which is how we calculate it in practice. We do this in Figure \ref{nullity}, which agrees with the tables of results shown in \cite{jaap} for $k=2$ and $k=3$, but generalizes them up to $k=13$.
+\paragraph{} The dimension of the nullspace can also be determined by performing modulo-$k$ LU factorization on $A$, then counting the number of nonzero entries in the upper-triangular matrix $U$, which is how we calculate it in practice. We do this in Figure \ref{nullity}, which agrees with the tables of results shown in \cite{jaap} for $k=2$ and $k=3$, but generalizes them up to $k=16$.
 
 \begin{figure}
 \caption{Plots of theoretical predictions for solvability based on \cite{involve}  The relatively prime entries are in blue.}
@@ -192,7 +192,9 @@ Ax = x,
 A^px = x,
 \end{equation}
 
-\noindent or in other words, $x$ is an eigenvector of $A^p$ with eigenvalue 1. For every non-singular $A$ (at least using the standard Lights Out transition matrix), we found that $A^{p'}$ actually always equalled the identity matrix for some $p'$ (although there would still be a spectrum of eigenstates of lower powers of $A$), so that \textit{every} possible grid state is actually part of a solution cycle for some $p \leq p'$.
+\noindent or in other words, $x$ is an eigenvector of $A^p$ with eigenvalue 1.
+
+\paragraph{} For every non-singular $A$ (at least using the standard Lights Out transition matrix), we found that $A^{p'}$ actually always equalled the identity matrix for some $p'$ (although there would still be a spectrum of eigenstates of lower powers of $A$), so that \textit{every} possible grid state is actually part of a solution cycle for some $p \leq p'$.  This result suggests an interesting way of solving a lights out pattern for a non-singular grid size.  By repeatedly pressing all the lit up buttons, eventually one clears the board because $A^{p' - 1} = A^{-1}$.  For the standard 7x7 game, $p’ = 8$ and any initial state can be solved by doing 7 passes at pressing all the lit up buttons.
 
 \paragraph{} Figure \ref{eigencounts} shows counts of the number of each vector in each cycle of period $p$ (the number of such cycles can be obtained by dividing the cell's value by $p$), for $2 \times 2$ and $3 \times 3$ grids at several \modZ{k}. Note that generating these numbers requires exhaustively iterating through every possible grid (of which there are $k^{mn}$ for an $m \times n$ grid on \modZ{k}), so they can only be computed iteratively for relatively small $k$, $m$, and/or $n$.
 
