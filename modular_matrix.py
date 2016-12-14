@@ -191,13 +191,20 @@ class ModularMatrix():
     #give up after 100 trials, matrix probably singular
     np.random.seed(0)
     trials = 0
-    while trials < 100 and not self.relatively_prime[U[j, j]]:
+    newU = U[j, j:n].copy()
+    newL = L[j, 0:j].copy()
+    newP = P[j, :].copy()
+    while trials < 100:
       i = np.random.randint(j+1, n)
-      U[j, j:n] = (U[j, j:n] + U[i, j:n]) % self.modulus
-      L[j, 0:j] = (L[j, 0:j] + L[i, 0:j]) % self.modulus
-      P[j, :] = (P[j, :] + P[i, :]) % self.modulus
+      newU = (newU + U[i, j:n]) % self.modulus
+      newL = (newL + L[i, 0:j]) % self.modulus
+      newP = (newP + P[i, :]) % self.modulus
+      if self.relatively_prime[newU[0]]:
+        U[j, j:n] = newU
+        L[j, 0:j] = newL
+        P[j, :] = newP
+        break
       trials += 1
-
 
 moddiv_cache = {}
 def mod_divide(a, b, mod):
@@ -422,5 +429,13 @@ if __name__ == '__main__':
   I3 = np.identity(3, dtype=np.int8)
   Icalc = (A * A.inverse()).array
   np.testing.assert_array_equal(Icalc, I3)
+
+  # edge case 2
+  A = ModularMatrix(
+    np.array( [[4, 3],
+               [3, 4]], dtype=np.int8), 6)
+  I2 = np.identity(2, dtype=np.int8)
+  Icalc = (A * A.inverse()).array
+  np.testing.assert_array_equal(Icalc, I2)
 
   print('done!')
