@@ -1,14 +1,7 @@
-# AM205 Final Project - Generalized Lights Out
+# Modulo-`k` Lights Out
 
-Lights out can be played:
-- on a 3D solid
-- with multiple intermediate light states
-- such that the victory condition is reaching an arbitrary goal state
-- with an arbitrary directed and weighted press-effect graph
-- with time-evolution effects
+## AM205 Final Project, Fall 2016
 
-## Useful Links
+**Shawn Pan and Andrew Ross**
 
-- [Jaap's Puzzle Page - The Mathematics of Lights Out](http://www.jaapsch.net/puzzles/lomath.htm)
-- [Guide into OpenMP](./docs/OpenMP.pdf)
-- [Project Guidelines](./docs/am205_fproj.pdf)
+For an overview of the project, see the [writeup](./writeup/writeup.pdf). For the core code we wrote to solve modular systems of equations, see [`code/modular_matrix.py`](./code/modular_matrix.py). For the page that initially inspired the project, see [Jaap's Puzzle Page](http://www.jaapsch.net/puzzles/lomath.htm).
