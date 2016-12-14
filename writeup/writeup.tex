@@ -159,14 +159,14 @@ A = A^{-1} =
 
 \paragraph{} Another application of finding multiple solutions to a singular matrix is to extract eigenvectors.  We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors as shown in Figure \ref{eigbasis77}.  After discarding the all zeros case, there are 127 total eigenvector patterns.  In mod 2, the eigenvectors have a nice interpretation that the presses required to solve a pattern are exactly the pattern itself.
 
-\begin{figure}
+\begin{figure}[H]
 \caption{Plots of the 7 basis eigenvectors of the standard 7x7 game (mod 2).}
 \label{eigbasis77}
 \includegraphics[width=\textwidth]{eigbasis77.png}
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[H]
 \caption{Plots of the basis eigenvectors of the 7x7 grid (mod 7).}
 \label{eig777all}
 \includegraphics[width=\textwidth]{eig777all.png}
@@ -186,7 +186,7 @@ A = A^{-1} =
 Ax = x,
 \end{equation}
 
-\noindent where, starting from an unlit board, pressing all of the lit buttons and repeating solution "cycles" (of period $p$) are characterized by:
+\noindent where, starting from an unlit board, pressing all of the buttons in $x$ that number of times will produce a board lit in the exact same pattern (or we can solve the board by pressing $-x \% k$). We can also consider situations where pressing each button $x$, then pressing all of the buttons in the resulting pattern, and so on for $p$ iterations will produce $x$, which we'll refer to as a cycle of period $p$, because it itself behaves in a modular fashion. These cases are characterized by:
 
 \begin{equation}
 A^px = x,
@@ -230,7 +230,6 @@ A^px = x,
 \end{figure}
 
 \paragraph{} We also iterated through and computed $p'$, the power at which $A^{p'}$ becomes the identity, for many grid sizes and \modZ{k}. Some numerical results are shown in Figure \ref{cycles-table}.
-%In Figure \ref{cycles-vs-null} we also compared when $A^{p'} = \mathbb{1}$ to when $A$ is singular, and verified that when nullity is positive, $A$ can never be a root of the (modular) identity.
 
 \begin{figure}[H]
   \caption{$p'$ such that $A^{p'}$ is the identity for \modZ{2} and \modZ{3} at various grid sizes}
@@ -260,12 +259,6 @@ A^px = x,
   \end{center}
 \end{figure}
 
-%\begin{figure}[H]
-  %\caption{Nullity and $p'$ at various $\mathbb{Z}_k$ and grid sizes}
-  %\label{cycles-vs-null}
-  %\includegraphics[width=\textwidth]{cycles-vs-nullity-small.png}
-%\end{figure}
-
 \paragraph{} For singular matrices $A$, we also found cases where
 
 \begin{equation}
@@ -276,7 +269,7 @@ A^px = x,
 \label{eq:transient}
 \end{equation}
 
-\noindent that is, where after $n_1$ "iterations" of solving solutions, we would enter a repeating solution cycle with period $n_2$ that didn't contain our initial set of $n_1$ transient states. In these cases $A^n$ never equalled the identity, which clearly must be true for \eqref{eq:transient} to hold. Some examples are visible in Figures \ref{655-transient} and \ref{655-transient-long}.
+\noindent that is, where after $n_1$ "iterations" of applying $A$, we would enter a repeating cycle with period $n_2$ that never returned to any members of our initial set of $n_1$ transient states. In these cases $A^n$ never equalled the identity, which clearly must be true for \eqref{eq:transient} to hold. Some examples are visible in Figures \ref{655-transient} and \ref{655-transient-long}.
 
 \begin{figure}[H]
   \caption{3-state transient path ending in a 6-state cycle of $A$ for \modZ{6} on a $5 \times 5$ grid.}
@@ -292,10 +285,14 @@ A^px = x,
 
 There is also interesting structure in the numbers of transient states. In particular, e.g. for $A$ in \modZ{6} on the $2 \times 2$ grid, for each of the 36 eigenvectors $x$ of $A$, there are two states that transiently lead to $x$, and similarly for the 396 eigenvectors of $A^2$. So altogether, that accounts for all $36+72+396+792=6^4$ possible grids in $2 \times 2$ \modZ{6}. More complex patterns occur at higher grid dimensions and modularities, including cases where states that transiently lead to eigenstates of $A^p$ themselves have states which transiently lead to them -- e.g. at \modZ{9} on the $2 \times 2$ grid, where each of the 81 eigenstates has 2 immediate transient parents, which themselves each have 3 parents, with the exact same pattern holding for the 648 eigenstates of $A^2$.
 
+\paragraph{} So, summarizing and analyzing these results, if we consider the overall shape of the graph of $k^{mn}$ states reachable by repeatedly applying $A$ in \modZ{k}, then in the case when $A$ is invertible, it appears to be organized into rings, and when $n=m$, there are always $k^n$ (not necessarily independent) eigenstates with eigenvalue 1 (i.e. a ring with only one element). When $A$ is not invertible, there still appear to be $k^n$ eigenstates with eigenvalue 1, and rings with more elements, but they do not constitute the entirety of the state space, and instead the rest of the states form trees branching off of each ring state, seemingly with equal branching factor everywhere (although we only considered a few examples). Future work would ideally analyze this structure theoretically, rather than experimentally.
+
 \section*{Visually Appealing Solutions}
 
-\begin{figure}
-  \caption{One of many intermediate frames from a solution video to a $64 \times 64$ grid in \modZ{51} with a complicated transition matrix $A_c$. Note that since $A_c$ is invertible, the sequence of presses on the right can be transformed back into the original image, which may be of interest cryptographically.}
+We also generated cool plots...
+
+\begin{figure}[H]
+  \caption{One of many intermediate frames from a solution video to a $64 \times 64$ grid in \modZ{51} with a complicated transition matrix $A_c$. A full video is available at \href{https://goo.gl/z2jQuk}{goo.gl/z2jQuk}. Note that since $A_c$ is invertible, the sequence of presses on the right can be transformed back into the original image, which may be of cryptographic interest.}
   \label{chr-solution}
   \includegraphics[width=\textwidth]{img000072418.png}
 \end{figure}
