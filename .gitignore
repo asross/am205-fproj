@@ -7,3 +7,4 @@ harvard2/
 *.log
 *.aux
 .ipynb_checkpoints/
+chr/

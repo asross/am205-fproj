@@ -28,17 +28,27 @@ def image_grid(filename, resolution):
     return (scipy.misc.imread(filename, mode='L') * ((resolution-1) / 255.0)).round().astype(np.int8)
 
 if __name__ == '__main__':
-  grid = np.array([
-    [0, 1, 0, 1, 0, 2],
-    [1, 0, 1, 0, 2, 0],
-    [0, 1, 0, 2, 0, 1],
-    [1, 0, 2, 0, 1, 0],
-    [0, 2, 0, 1, 0, 1],
-    [2, 0, 1, 0, 1, 0]
-  ])
-  adj = lambda i, j: [[i,j,2],[i+1,j,1],[i-1,j,1],[i,j+1,1],[i,j-1,1]]
-  animate_solution(grid, transition_matrix(adj, *grid.shape, 3))
+  # grid = np.array([
+    # [0, 1, 0, 1, 0, 2],
+    # [1, 0, 1, 0, 2, 0],
+    # [0, 1, 0, 2, 0, 1],
+    # [1, 0, 2, 0, 1, 0],
+    # [0, 2, 0, 1, 0, 1],
+    # [2, 0, 1, 0, 1, 0]
+  # ])
+  # adj = lambda i, j: [[i,j,2],[i+1,j,2],[i-1,j,1],[i,j+1,1],[i,j-1,1]]
 
   # grid = image_grid('harvard-icon.png', 8)
   # adj = lambda i, j: [[i,j,7],[i+1,j,3],[i-1,j,2],[i,j+1,3],[i,j-1,4]]
-  # animate_solution(grid, transition_matrix(adj, *grid.shape, 8), fname='harvard/img', framerate=50)
+  # animate_solution(grid, transition_matrix(adj, *grid.shape, 8), fname='harvard2/img', framerate=50)
+
+  # grid = image_grid('chr.png', 51)
+  # adj = lambda i, j: [
+      # [i,j,31],
+      # [i+1,j,23],[i-1,j,19],[i,j+1,19],[i,j-1,19],
+      # [i+1,j+1,19],[i-1,j-1,19],[i-1,j+1,19],[i+1,j-1,19],
+      # [i+2,j+1,13],[i-2,j-1,13],[i-1,j+2,13],[i+1,j-2,13],
+      # [i+2,j+2,13],[i-2,j-2,13],[i-2,j+2,13],[i+2,j-2,13],
+      # [i+3,j+3,13],[i-3,j-3,13],[i-3,j+3,13],[i+3,j-3,13]
+      # ]
+  # animate_solution(grid, transition_matrix(adj, *grid.shape, 51), fname='chr/img', framerate=50)
