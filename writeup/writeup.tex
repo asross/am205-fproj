@@ -157,11 +157,19 @@ A = A^{-1} =
 \paragraph{} Another application of finding multiple solutions to a singular matrix is to extract eigenvectors.  We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors as shown in Figure \ref{eigbasis77}.  After discarding the all zeros case, there are 127 total eigenvector patterns.  In mod 2, the eigenvectors have a nice interpretation that the presses required to solve a pattern are exactly the pattern itself.
 
 \begin{figure}
-\caption{Plots of the 7 basis eigenvectors of the standard 7x7 game.}
+\caption{Plots of the 7 basis eigenvectors of the standard 7x7 game (mod 2).}
 \label{eigbasis77}
 \includegraphics[width=\textwidth]{eigbasis77.png}
 \end{figure}
 
+
+\begin{figure}
+\caption{Plots of the basis eigenvectors of the 7x7 grid (mod 7).}
+\label{eig777all}
+\includegraphics[width=\textwidth]{eig777all.png}
+\end{figure}
+
+\paragraph{} For a higher modulus such as 7, we can get eigenvectors corresponding to different eigenvalues as shown in Figure \ref{eig777all}.  Note that the corresponding solution of presses to clear the board is -1 times the eigenvector mod 7.  In other words, you would have to press the buttons as specified 6 times to cycle around to a blank board.
 
 \subsection*{Challenges with Composite Modulus}
 
