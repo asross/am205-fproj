@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#utilities to generate various lights out grids
 from modular_matrix import *
 
 def transition_matrix(adj_fn, rows, cols, mod):

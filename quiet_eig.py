@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#Solve for quiet states and eigenvectors
 from modular_matrix import *
 from transition_helpers import *
 import numpy as np

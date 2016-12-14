@@ -1,3 +1,4 @@
+#analyze cycles
 from modular_matrix import *
 from transition_helpers import *
 import numpy as np
@@ -35,7 +36,7 @@ def cycle_for(transition_fn, grid, return_states=False):
 def forward_cycle(A, grid, **kwargs):
   return cycle_for(lambda b: A.dot(b),
       grid, **kwargs)
-  
+
 def inverse_cycle(A, grid, **kwargs):
   return cycle_for(lambda b: A.solve(b, singular_mode="any"),
       grid, **kwargs)

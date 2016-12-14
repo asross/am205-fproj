@@ -1,9 +1,15 @@
 #!/usr/bin/python
 import numpy as np
 
+#error subclass for singular matrices
 class SingularMatrixError(ValueError):
     pass
 
+#Represents a matrix with an associated modulus.
+#This class is structured as a wrapper around a numpy array,
+#and implements many common matrix operations modulo n
+#such as adding, subtraction, multiplication, solving by LU factorization,
+#rank, nullity, and inverse.
 class ModularMatrix():
   def __init__(self, array, modulus):
     self.array = np.array(array) % modulus
@@ -45,6 +51,7 @@ class ModularMatrix():
 
   #solve Ax = b with LU factorization and forward/backward substitution
   #takes in a keyword to decide what to do if the matrix is singular an has many solutions
+  #WARNING: solving for multiple solutions only works for a prime modulus
   #error (default): throw error
   #any: return arbitrary solution
   #basis: find a basis of the solution space
@@ -217,7 +224,8 @@ def mod_divide(a, b, mod):
         moddiv_cache[mod][dividend, j] = i
   return moddiv_cache[mod][a][b]
 
-#gcd for python 2 support
+#gcd by Euclid's algoritm for Python 2 support
+#python 3 also has math.gcd
 def gcd(a, b):
   while b > 0:
     temp = b

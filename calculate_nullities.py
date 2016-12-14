@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#generates a table of nullities for various moduli and grid sizes
 
 from modular_matrix import *
 from transition_helpers import *

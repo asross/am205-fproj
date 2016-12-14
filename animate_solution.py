@@ -1,3 +1,4 @@
+#animates a solution of button presses for an image into a video
 from modular_matrix import *
 from transition_helpers import *
 import os
