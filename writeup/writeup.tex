@@ -126,7 +126,7 @@ A = A^{-1} =
 
 \section*{Singular Transition Matrices}
 
-\paragraph{} Although LU factorization followed by forward and backward substitution works well for solving full rank matrices, the default procedure does not work for singular matrices.  When exploring the light out problem, we often run into this issue.  For example, consider the transition matrix for the standard 5x5 lights out game.  The matrix has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has a solution space of $2^23$ states and null space of $2^2$ states.  We have adapted our algorithm to deal with the singular cases with multiple solutions for a prime modulus.
+\paragraph{} Although LU factorization followed by forward and backward substitution works well for solving full rank matrices, the default procedure does not work for singular matrices.  When exploring the light out problem, we often run into this issue.  For example, the transition matrix for the standard 5x5 lights out game has rank 23 and nullity 2.
 
 \subsection*{Multiple Solutions for Prime Modulus}
 
@@ -143,10 +143,10 @@ A = A^{-1} =
 
 \subsection*{Applications of Finding Multiple Solutions}
 
-Applications of finding multiple solutions of a singular matrix include finding eigenvalues and quiet states.
+\paragraph{} The standard 5x5 lights out game has been studied in depth by \cite{jaap}.  The transition matrix for the standard 5x5 lights out game has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has $2^23$ solvable states, each with $2^2$ solutions.  Our singular solver can be applied in this situation to find all the solutions for a 5x5 puzzle state.
 
 
-The 5x5 cases has a nullity of 2.
+\paragraph{} Furthermore, we can extract the quiet states for the 5x5 case by finding all the solutions to $Ax = 0$.  Quiet states are members of the null space and represent a series of presses with no effect on the pattern.  As shown in Figure \ref{quiet55}, our results match previous work.
 
 \begin{figure}
 \caption{Plots of all quiet states for the standard 5x5 game.  Agrees with results from \cite{jaap}}
@@ -154,8 +154,7 @@ The 5x5 cases has a nullity of 2.
 \includegraphics[width=4in]{quiet55.png}
 \end{figure}
 
-
-We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors.
+\paragraph{} Another application of finding multiple solutions to a singular matrix is to extract eigenvectors.  We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors as shown in Figure \ref{eigbasis77}.  After discarding the all zeros case, there are 127 total eigenvector patterns.  In mod 2, the eigenvectors have a nice interpretation that the presses required to solve a pattern are exactly the pattern itself.
 
 \begin{figure}
 \caption{Plots of the 7 basis eigenvectors of the standard 7x7 game.}
