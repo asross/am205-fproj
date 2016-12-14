@@ -58,7 +58,7 @@ Ax = b,
 \includegraphics[width=\textwidth]{relprime.png}
 \end{figure}
 
-\paragraph{} What's interesting, though, is that our plots in Figure \ref{nullity} actually disagree in certain cases with a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows plot of those theoretical predictions, which you can see agree with the results in Figure \ref{nullity} but only when $k$ is prime. Coincidentally, \cite{involve} only proves that result for prime values of $k$, but it is unclear whether their result actually doesn't hold for non-prime values of $k$ (or if there is an error in our code).
+\paragraph{} We also examined a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if and only if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows a plot of those theoretical predictions.  Our nullity calculations agree with this theoretical result.
 
 \begin{figure}
 \caption{Comparison of full rank grid sizes for the standard transition matrix for mod 2, mod 3, and mod 6}
@@ -66,6 +66,7 @@ Ax = b,
 \includegraphics[width=\textwidth]{mod6overlap.png}
 \end{figure}
 
+\paragraph{} One interesting observation from Figure \ref{relprime} is that powers of 2 moduli share the same full rank grid sizes, and likewise for the powers of 3.  Furthermore, the full rank grid sizes for mod 6 are the intersection for that of mod 2 and mod 3, as shown in Figure \ref{overlap236}.  This result follows directly from the theorem above.  An intuitive interpretation is that mod 2 patterns and mod 3 patterns can be simulated in mod 6 by restricting operations to multiples of 3 and 2 presses respectively.  Therefore, a non-singular grid size in mod 6 must be non-singular in both mod 2 and mod 3.
 
 \section*{Solving Matrices on a Modular Field}
 
@@ -169,7 +170,7 @@ A = A^{-1} =
 \includegraphics[width=\textwidth]{eig777all.png}
 \end{figure}
 
-\paragraph{} For a higher modulus such as 7, we can get eigenvectors corresponding to different eigenvalues as shown in Figure \ref{eig777all}.  Note that the corresponding solution of presses to clear the board is -1 times the eigenvector mod 7.  In other words, you would have to press the buttons as specified 6 times to cycle around to a blank board.
+\paragraph{} For a higher modulus such as 7, we can get eigenvectors corresponding to different eigenvalues as shown in Figure \ref{eig777all}.  The presses required to clear the board are $-\lambda^{-1}$ times the eigenvector mod 7.  Basically, you would need to press the buttons of the eigenvector multiple times to cycle around to a blank board.
 
 \subsection*{Challenges with Composite Modulus}
 
