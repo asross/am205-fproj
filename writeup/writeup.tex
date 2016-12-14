@@ -24,13 +24,13 @@
 
 \section*{Introduction}
 
-\paragraph{} Lights Out is an electronic puzzle game released by Tiger Electronics (who notably also developed the \href{https://en.wikipedia.org/wiki/Furby}{Furby}) in 1995. An individual puzzle in Lights Out consists of a configuration of lit and unlit buttons on a 5x5 grid. Pressing any button toggles its state and that of the four adjacent buttons, and the goal is to turn all lights off in as few moves as possible.
+\paragraph{} Lights Out is an electronic puzzle game released by Tiger Electronics (the same company that developed the \href{https://en.wikipedia.org/wiki/Furby}{Furby}) in 1995. An individual puzzle in Lights Out consists of a configuration of lit and unlit buttons on a 5x5 grid. Pressing any button toggles its state and that of the four adjacent buttons, and the goal is to turn all lights off in as few moves as possible.
 
 \paragraph{} The effect of any sequence of presses can be represented as a modulo 2 sum of vectors (where each 2D board coordinate is mapped to a 1D vector position), and because summation is commutative, the sequence of presses will have the same effect regardless of its order. We can represent the constraints of the problem as a system of equations in $\mathbb{Z}_2$ (i.e. modular arithmetic on $\{0, 1\}$), which we can more helpfully write as a matrix equation
 
-\begin{equation}
+$$
 Ax = b,
-\end{equation}
+$$
 
 \noindent where $b = \langle g_{11}, g_{12}, \cdots, g_{15}, g_{21}, \cdots, g_{55} \rangle$ is the length-25 vector of grid states $g_{ij}$, which are 1 if lit and 0 otherwise, $x$ is the length-25 vector of presses, and $A$ is a matrix that encodes the transitions. In the standard Lights Out game, $A_{ij}$ is 1 along the main diagonal and, except at 2D board edges, 1 at positions one and five cells above and below the main diagonal. In the more general case, $A$ can be any matrix encoding transitions, the grid can have any dimensions, and transitions can occur not just in $\mathbb{Z}_2$ (modulo 2) but $\mathbb{Z}_k$.
 
@@ -60,7 +60,7 @@ Ax = b,
 \includegraphics[width=\textwidth]{relprime.png}
 \end{figure}
 
-\paragraph{} We also examined a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if and only if $det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows a plot of those theoretical predictions.  Our nullity calculations agree with this theoretical result.
+\paragraph{} We also examined a theoretical result from \cite{involve}, which states that $A$ must span $\mathbb{Z}_k$ if and only if $\det(A)$ and $k$ are coprime (i.e. their greatest common denominator is 1). Figure \ref{relprime} shows a plot of those theoretical predictions.  Our nullity calculations agree with this theoretical result.
 
 \begin{figure}
 \caption{Comparison of full rank grid sizes for the standard transition matrix for mod 2, mod 3, and mod 6}
@@ -68,13 +68,13 @@ Ax = b,
 \includegraphics[width=\textwidth]{mod6overlap.png}
 \end{figure}
 
-\paragraph{} One interesting observation from Figure \ref{relprime} is that powers of 2 moduli share the same full rank grid sizes, and likewise for the powers of 3.  Furthermore, the full rank grid sizes for mod 6 are the intersection for that of mod 2 and mod 3, as shown in Figure \ref{overlap236}.  This result follows directly from the theorem above.  An intuitive interpretation is that mod 2 patterns and mod 3 patterns can be simulated in mod 6 by restricting operations to multiples of 3 and 2 presses respectively.  Therefore, a non-singular grid size in mod 6 must be non-singular in both mod 2 and mod 3.
+\paragraph{} One interesting observation from Figure \ref{relprime} is that moduli which are powers of two share the same full rank grid sizes, and likewise for powers of three.  Furthermore, the set of grid sizes at which $A$ mod 6 is full rank is the intersection of the sets for mod 2 and mod 3, as shown in Figure \ref{overlap236}.  This result follows directly from the theorem above.  An intuitive interpretation is that mod 2 patterns and mod 3 patterns can be simulated in mod 6 by restricting operations to multiples of 3 and 2 presses respectively.  Therefore, a non-singular grid size in mod 6 must be non-singular in both mod 2 and mod 3.
 
 \section*{Solving Matrices on a Modular Field}
 
 \subsection*{LU Factorization}
 
-\paragraph{} We have implemented a variant of LU factorization to efficiently solve our transition matrices over a modular field.  The standard LU factorization decomposes the matrix into a product of a lower diagonal matrix $L$ and an upper diagonal matrix $U$.  The decomposed form allows problems of the form $Ax = b$ to be solved efficiently chaining 2 triangular matrix solves.  Triangular matrices can be solved with forward and backward substitution.
+\paragraph{} We have implemented a variant of LU factorization to efficiently solve our transition matrices over a modular field.  The standard LU factorization decomposes the matrix into a product of a lower diagonal matrix $L$ and an upper diagonal matrix $U$.  The decomposed form allows problems of the form $Ax = b$ to be solved efficiently chaining two triangular matrix solves.  Triangular matrices can be solved with forward and backward substitution.
 
 
 \paragraph{} Since the standard LU algorithm is well known, we will focus our attention on the details for implementing it over a modular field.  Addition, subtraction, and multiplication can all be carried on as usual with an additional modulo step at the end to keep the result in the valid range.  The major challenge of LU factorization over a modular field that we faced was handling division.  Division should be treated as the inverse of multiplication.  For example $3 / 2 = 4$ in mod 5, because $2 \times 4 = 3$.  Because we explored relatively small moduli, we precomputed the appropriate division tables by looping over all the pairwise multiplications.
@@ -88,7 +88,7 @@ Ax = b,
 \paragraph{} A naive first attempt is to swap a row with zero diagonal entry with any row containing a non-zero entry in the corresponding spot.  This method works perfectly well for a prime modulus, but we run into issues with composite moduli.  For example, consider $1 / 2$ mod 6.  There is no solution satisfying $2x = 1$ in mod 6.  This undefined division becomes a problem if 2 is a diagonal entry.  Therefore, we require that the pivots values for the diagonal be relatively prime to the modulus.
 
 
-\paragraph{} As a second pass, we use partial pivoting to select a row to make the diagonal entry relatively prime to the modulus.  We implemented Euclid’s algorithm to find the greatest common factor.  It turns out that this solution works when the modulus is prime or a power of a prime.  The solution solves many matrices with other composite moduli, but runs into some issues.  Consider the following example of an invertible matrix in mod 6:
+\paragraph{} As a second pass, we use partial pivoting to select a row to make the diagonal entry relatively prime to the modulus.  We implemented Euclid's algorithm to find the greatest common factor.  It turns out that this solution works when the modulus is prime or a power of a prime.  The solution solves many matrices with other composite moduli, but runs into some issues.  Consider the following example of an invertible matrix in mod 6:
 
 \[
 A =
@@ -106,11 +106,11 @@ A^{-1} =
 \end{pmatrix}
 \]
 
-\paragraph{} 1 and 5 are the possible pivot factors which are relatively prime to 6.  None of the entries in the first column of $A$ are suitable as pivot factors.  Intuitively, the problem is that none of rows are suitable for pivoting, but the matrix is not singular because a linear combination of 2 rows is a valid pivot: $2 + 3 = 5$.  There are however a couple entries of 1 in the middle column.
+\paragraph{} 1 and 5 are the possible pivot factors which are relatively prime to 6.  None of the entries in the first column of $A$ are suitable as pivot factors.  Intuitively, the problem is that none of rows are suitable for pivoting, but the matrix is not singular because a linear combination of 2 rows is a valid pivot: $2 + 3 = 5$.  There are however several 1s in the middle column, which would be valid pivots if we could access them.
 
 \subsection*{Full Pivoting}
 
-\paragraph{} We next implemented full pivoting to get more choices for possibly pivot factors.  With full pivoting, columns may also be swapped.  The factorization then becomes $PAQ = LU$ where $P$ and $Q$ are the row and column permutation matrices respectively.  In the previous example, full pivoting allows use to move the 1 in the center of the matrix to the active diagonal spot for factorization.  Although full pivoting work is sufficient for over 90\% of the cases we explored, occasionally it still fails to solve an invertible matrix, such as the following matrix in mod 6:
+\paragraph{} We next implemented full pivoting to get more choices for possibly pivot factors.  With full pivoting, columns may also be swapped.  The factorization then becomes $PAQ = LU$, where $P$ and $Q$ are the row and column permutation matrices respectively.  For the matrix in the previous example, full pivoting allows us to move the 1 in the center of the matrix to the active diagonal spot for factorization.  Although full pivoting is sufficient for over 90\% of the cases we explored, occasionally it still fails to solve an invertible matrix, such as the following matrix in mod 6:
 
 \[
 A = A^{-1} =
@@ -146,15 +146,17 @@ A = A^{-1} =
 
 \subsection*{Applications of Finding Multiple Solutions}
 
-\paragraph{} The standard 5x5 lights out game has been studied in depth by \cite{jaap}.  The transition matrix for the standard 5x5 lights out game has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has $2^23$ solvable states, each with $2^2$ solutions.  Our singular solver can be applied in this situation to find all the solutions for a 5x5 puzzle state.
+\paragraph{} The standard 5x5 lights out game has been studied in depth by \cite{jaap}.  The transition matrix for the standard 5x5 lights out game has rank 23 and nullity 2.  The interpretation is that not all states in the game are reachable from a blank grid.  The game has $2^{23}$ solvable states, each with $2^2$ solutions.  Our singular solver can be applied in this situation to find all the solutions for a 5x5 puzzle state.
 
 
 \paragraph{} Furthermore, we can extract the quiet states for the 5x5 case by finding all the solutions to $Ax = 0$.  Quiet states are members of the null space and represent a series of presses with no effect on the pattern.  As shown in Figure \ref{quiet55}, our results match previous work.
 
-\begin{figure}
-\caption{Plots of all quiet states for the standard 5x5 game.  Agrees with results from \cite{jaap}}
+\begin{figure}[H]
+\caption{Plots of all quiet states for the standard 5x5 game, which match the results from \cite{jaap}.}
 \label{quiet55}
+\begin{center}
 \includegraphics[width=4in]{quiet55.png}
+\end{center}
 \end{figure}
 
 \paragraph{} Another application of finding multiple solutions to a singular matrix is to extract eigenvectors.  We can find eigenvectors of eigenvalue $\lambda$ by solving the singular matrix $A - \lambda I$.  For the 7x7 mod 2 case, we find 7 linearly independent eigenvectors as shown in Figure \ref{eigbasis77}.  After discarding the all zeros case, there are 127 total eigenvector patterns.  In mod 2, the eigenvectors have a nice interpretation that the presses required to solve a pattern are exactly the pattern itself.
@@ -165,16 +167,17 @@ A = A^{-1} =
 \includegraphics[width=\textwidth]{eigbasis77.png}
 \end{figure}
 
-
-\begin{figure}[H]
+\begin{figure}
 \caption{Plots of the basis eigenvectors of the 7x7 grid (mod 7).}
 \label{eig777all}
+\begin{center}
 \includegraphics[width=\textwidth]{eig777all.png}
+\end{center}
 \end{figure}
 
 \paragraph{} For a higher modulus such as 7, we can get eigenvectors corresponding to different eigenvalues as shown in Figure \ref{eig777all}.  The presses required to clear the board are $-\lambda^{-1}$ times the eigenvector mod 7.  Basically, you would need to press the buttons of the eigenvector multiple times to cycle around to a blank board.
 
-\subsection*{Challenges with Composite Modulus}
+\subsection*{Challenges with Composite Moduli}
 
 \paragraph{} We briefly explored finding solutions to singular matrices over fields with composite moduli.  The rank of a matrix would now be the number of relatively prime diagonal entries in $U$.  A major challenge is that not all singular values are equivalent, and we have a wide variety of cases beyond $0x = 0$ and $0x =1$.  For example, in mod 6 you can have rows representing equations such as $3x = 0$ which has 3 solutions of 0, 2, and 4, or $2x = 1$ which has no solution.  Even to correctly count the number of solutions is challenging and depends on the particular non-relatively prime values along the diagonal.  Enumerating all the solutions for the composite case may be interesting future work.
 
@@ -182,21 +185,21 @@ A = A^{-1} =
 
 \paragraph{} Eigenvectors with eigenvalue 1 are characterized by the following equation:
 
-\begin{equation}
+\[
 Ax = x,
-\end{equation}
+\]
 
-\noindent where, starting from an unlit board, pressing all of the buttons in $x$ that number of times will produce a board lit in the exact same pattern (or we can solve the board by pressing $-x \% k$). We can also consider situations where pressing each button $x$, then pressing all of the buttons in the resulting pattern, and so on for $p$ iterations will produce $x$, which we'll refer to as a cycle of period $p$, because it itself behaves in a modular fashion. These cases are characterized by:
+\noindent where, starting from an unlit board, pressing all of the buttons in $x$ that number of times will produce a board lit in the exact same pattern (or we can solve the board by pressing $-x$ mod $k$). We can also consider situations where pressing each button in $x$, then pressing all of the buttons in the resulting pattern, and so on for $p$ iterations will eventually reproduce $x$. We'll refer to this case as a cycle of period $p$. These cycles are characterized by:
 
-\begin{equation}
+\[
 A^px = x,
-\end{equation}
+\]
 
 \noindent or in other words, $x$ is an eigenvector of $A^p$ with eigenvalue 1.
 
-\paragraph{} For every non-singular $A$ (at least using the standard Lights Out transition matrix), we found that $A^{p'}$ actually always equalled the identity matrix for some $p'$ (although there would still be a spectrum of eigenstates of lower powers of $A$), so that \textit{every} possible grid state is actually part of a solution cycle for some $p \leq p'$.  This result suggests an interesting way of solving a lights out pattern for a non-singular grid size.  By repeatedly pressing all the lit up buttons, eventually one clears the board because $A^{p' - 1} = A^{-1}$.  For the standard 7x7 game, $p’ = 8$ and any initial state can be solved by doing 7 passes at pressing all the lit up buttons.
+\paragraph{} For every non-singular $A$ (at least for standard Lights Out transition rules), we found that $A^{p'}$ actually always equals the identity matrix for some $p'$ (although there is still a spectrum of eigenstates of lower powers of $A$), so that \textit{every} possible grid state is actually part of a solution cycle for some $p \leq p'$.  This result suggests an interesting way of solving a lights out pattern for a non-singular grid size.  By repeatedly pressing all the lit up buttons, eventually one clears the board because $A^{p' - 1} = A^{-1}$.  For the standard 7x7 game, $p' = 8$ and any initial state can be solved by doing 7 passes at pressing all the lit up buttons. We will call $p'$ the identity root of $A$.
 
-\paragraph{} Figure \ref{eigencounts} shows counts of the number of each vector in each cycle of period $p$ (the number of such cycles can be obtained by dividing the cell's value by $p$), for $2 \times 2$ and $3 \times 3$ grids at several \modZ{k}. Note that generating these numbers requires exhaustively iterating through every possible grid (of which there are $k^{mn}$ for an $m \times n$ grid on \modZ{k}), so they can only be computed iteratively for relatively small $k$, $m$, and/or $n$.
+\paragraph{} Figure \ref{eigencounts} shows counts of the numbers of button states that belong to cycles of different periods $p$ for $2 \times 2$ and $3 \times 3$ grids at several \modZ{k}. The number of distinct cycles, rather than the number of states, can be obtained by dividing the cell's value by $p$. Note that generating these quantities requires exhaustively iterating through every possible grid (of which there are $k^{mn}$), so they can only be computed iteratively when at least one of $k$, $m$, and $n$ is relatively small. Some patterns in the data are already immediately evident.
 
 \begin{figure}[H]
   \caption{Counts of eigenstates of $A^p$ for $2 \times 2$ and $3 \times 3$ grids at various \modZ{k}}
@@ -205,7 +208,7 @@ A^px = x,
   \begin{center}
   \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{7}{|c|}{\# Eigenstates of $A^p$ for $2 \times 2$ grid} \\ \hline
+    \multicolumn{7}{|c|}{Number of states in cycles of period $p$ on the $2 \times 2$ grid} \\ \hline
     $k, p$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{6}&\textbf{8}&\textbf{Total}\\ \hline
     \textbf{2}  & 4   & 12   & 0    & 0    & 0    & $16=2^4$ \\ \hline
     \textbf{3}  & 9   & 18   & 0    & 0    & 0    & $36$ \\ \hline
@@ -221,7 +224,7 @@ A^px = x,
 
   \begin{tabular}{|l|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{8}{|c|}{\# Eigenstates of $A^p$ for $3 \times 3$ grid} \\ \hline
+    \multicolumn{8}{|c|}{Number of states in cycles of period $p$ on the $3 \times 3$ grid} \\ \hline
     $k, n$&\textbf{1}&\textbf{2}&\textbf{4}&\textbf{8}&\textbf{12}&\textbf{24}&\textbf{Total}\\ \hline
     \textbf{2}  & 8   & 24   & 480    & 0      & 0     & 0       & $512=2^9$ \\ \hline
     \textbf{3}  & 27  & 0    & 0      & 19656  & 0     & 0       & $19683=3^9$ \\ \hline
@@ -231,15 +234,15 @@ A^px = x,
   \end{center}
 \end{figure}
 
-\paragraph{} We also iterated through and computed $p'$, the power at which $A^{p'}$ becomes the identity, for many grid sizes and \modZ{k}. Some numerical results are shown in Figure \ref{cycles-table}.
+\paragraph{} We also iterated through and computed the identity root $p'$ (again, the power at which $A^{p'}$ becomes the identity) for many grid sizes and moduli. Some numerical results are shown in Figure \ref{cycles-table}.
 
 \begin{figure}[H]
-  \caption{$p'$ such that $A^{p'}$ is the identity for \modZ{2} and \modZ{3} at various grid sizes}
+  \caption{Identity root for \modZ{2} and \modZ{3} at various grid sizes}
   \label{cycles-table}
   \begin{center}
   \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{7}{|c|}{$p'$ s.t. $A^{p'}=\mathbb{1}$ in $\mathbb{Z}_2$} \\ \hline
+    \multicolumn{7}{|c|}{Identity roots in $\mathbb{Z}_2$ by grid size} \\ \hline
     $n\times m$&\textbf{2}&\textbf{3}&\textbf{4}&\textbf{5}&\textbf{6}&\textbf{7}\\ \hline
     \textbf{2} & 2   & \fl & \fl & \fl & \fl & \fl \\ \hline
     \textbf{3} & \na & 4   & \fl & \fl & \fl & \fl \\ \hline
@@ -249,7 +252,7 @@ A^px = x,
     \textbf{7} & \na & 8   & 24  & \na & 56  & 8   \\ \hline
   \end{tabular} \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multicolumn{7}{|c|}{$p'$ s.t. $A^{p'}=\mathbb{1}$ in $\mathbb{Z}_3$} \\ \hline
+    \multicolumn{7}{|c|}{Identity roots in $\mathbb{Z}_3$ by grid size} \\ \hline
     $n\times m$&\textbf{2}&\textbf{3}&\textbf{4}&\textbf{5}&\textbf{6}&\textbf{7}\\ \hline
     \textbf{2} & \na & \fl & \fl & \fl & \fl & \fl \\ \hline
     \textbf{3} & \na & 8   & \fl & \fl & \fl & \fl \\ \hline
@@ -271,7 +274,7 @@ A^px = x,
 \label{eq:transient}
 \end{equation}
 
-\noindent that is, where after $p_1$ "iterations" of applying $A$, we would enter a repeating cycle with period $p_2$ that never returned to any members of our initial set of $p_1$ transient states. In these cases $A^p$ never equalled the identity, which clearly must be true for \eqref{eq:transient} to hold. Some examples are visible in Figures \ref{655-transient} and \ref{655-transient-long}.
+\noindent that is, where after $p_1$ iterations of applying $A$ to an initial state $x$, we enter a repeating cycle with period $p_2$ that never returns to any members of our initial set of $p_1$ transient states. In these cases, $A^{p'}$ never equals for any $p'$ the identity, which must be true for $x$ to be transient. Some examples are visible in Figures \ref{655-transient} and \ref{655-transient-long}.
 
 \begin{figure}[H]
   \caption{3-state transient path ending in a 6-state cycle of $A$ for \modZ{6} on a $5 \times 5$ grid.}
@@ -285,9 +288,9 @@ A^px = x,
   \includegraphics[width=\textwidth]{655-transient-long.png}
 \end{figure}
 
-There is also interesting structure in the numbers of transient states. In particular, e.g. for $A$ in \modZ{6} on the $2 \times 2$ grid, for each of the 36 eigenvectors $x$ of $A$, there are two states that transiently lead to $x$, and similarly for the 396 eigenvectors of $A^2$. So altogether, that accounts for all $36+72+396+792=6^4$ possible grids in $2 \times 2$ \modZ{6}. More complex patterns occur at higher grid dimensions and modularities, including cases where states that transiently lead to eigenstates of $A^p$ themselves have states which transiently lead to them -- e.g. at \modZ{9} on the $2 \times 2$ grid, where each of the 81 eigenstates has 2 immediate transient parents, which themselves each have 3 parents, with the exact same pattern holding for the 648 eigenstates of $A^2$.
+There is also interesting structure in the numbers of transient states. For example, for $A$ on the $2 \times 2$ grid mod 6, for each of the 36 eigenvectors of $A$, there are two states that transiently lead to it, and similarly for the 396 eigenvectors of $A^2$. Altogether, that accounts for every $36+72+396+792=6^4$ possible grid in $2 \times 2$ \modZ{6}. More complex patterns occur at higher grid dimensions and modularities, including cases where states that transiently lead to eigenstates of $A^p$ \textit{themselves} have states which transiently lead to them. For example, on the $2 \times 2$ grid mod 9, each of the 81 eigenstates of $A$ has 2 immediate transient parents, which themselves each have 3 parents. The same pattern holds for the 648 eigenstates of $A^2$, and again we obtain the full state space.
 
-\paragraph{} So, summarizing and analyzing these results, if we consider the overall shape of the graph of $k^{mn}$ states reachable by repeatedly applying $A$ in \modZ{k}, then in the case when $A$ is invertible, it appears to be organized into rings, and when $n=m$, there are always $k^n$ (not necessarily independent) eigenstates with eigenvalue 1 (i.e. a ring with only one element). When $A$ is not invertible, there still appear to be $k^n$ eigenstates with eigenvalue 1, and rings with more elements, but they do not constitute the entirety of the state space, and instead the rest of the states form trees branching off of each ring state, seemingly with equal branching factor everywhere (although we only considered a few examples). Future work would ideally analyze this structure theoretically, rather than experimentally.
+\paragraph{} We can summarize and analyze these results by considering how $A$ implicitly organizes the $k^{mn}$ button grid states into a graph (where you transition between states by applying $A$). In the case when $A$ is invertible, the state space is entirely divided into disconnected rings, with $k^n$ tiny rings of size 1 that consist of (not necessarily independent) eigenstates of $A$, and more rings that correspond to eigenstates of $A^p$. When $A$ is singular, there still appear to be disconnected rings of eigenstates of $A^p$ (and there are still $k^n$ eigenstates of $A$), but they do not constitute the entirety of the state space, and instead the rest of the states form trees branching off of each ring state, seemingly with equal branching factor everywhere (although we only considered a few examples). Future work would ideally analyze this structure theoretically, rather than experimentally.
 
 \section*{Visually Appealing Solutions}
 
